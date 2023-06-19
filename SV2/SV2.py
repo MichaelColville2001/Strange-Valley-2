@@ -16,20 +16,41 @@ relativePerspective = [0,0]
 mousePosition = [0,0]
 tempMousePosition = [0,0]
 state = ""
+leftRightMouseButton = [False,False,False]
 
 mapChunkSize = [20,20]
 invOn = False
+
+shift = False
+w = False
+a = False
+s = False
+d = False
  
 
 projectiles = {}
 
-items = {"none":{"type":None,"invSprite":None,"hotbarSprite":None},
+items = {"none":{"baseInfo":{"name":None,"type":None,"stacks":False,"invSprite":None,"hotbarSprite":None}},
          
-        "pick":{"type":"hand","first":"tool","second":"pick","damage":10,"durability":100,"invSprite":pygame.image.load("SV2/sprites/invView/pickIV.png").convert_alpha(),"hotbarSprite":pygame.image.load("SV2/sprites/hotbarView/pickHBV.png").convert_alpha()},
+        "pick":{"baseInfo":{"name":"pick","type":"hand","stacks":False,"invSprite":pygame.image.load("SV2/sprites/invView/pickIV.png").convert_alpha(),"hotbarSprite":pygame.image.load("SV2/sprites/hotbarView/pickHBV.png").convert_alpha()},"first":"tool","second":"pick","tier":0,"damage":10,"durability":100,"speed":20},
 
-        "rock":{"type":"inv","invSprite":pygame.image.load("SV2/sprites/invView/rockIV.png").convert_alpha(),"hotbarSprite":pygame.image.load("SV2/sprites/hotbarView/rockHBV.png").convert_alpha()},
+        "rock":{"baseInfo":{"name":"rock","type":"inv","stacks":True,"invSprite":pygame.image.load("SV2/sprites/invView/rockIV.png").convert_alpha(),"hotbarSprite":pygame.image.load("SV2/sprites/hotbarView/rockHBV.png").convert_alpha()},"stack":[1,8]},
 
-        "helm":{"type":"helm","invSprite":pygame.image.load("SV2/sprites/invView/helmIV.png").convert_alpha(),"hotbarSprite":pygame.image.load("SV2/sprites/hotbarView/helmHBV.png").convert_alpha()}}
+        "helm":{"baseInfo":{"name":"helm","type":"helm","stacks":False,"invSprite":pygame.image.load("SV2/sprites/invView/helmIV.png").convert_alpha(),"hotbarSprite":pygame.image.load("SV2/sprites/hotbarView/helmHBV.png").convert_alpha()}}
+        }
+
+def Convert_Item(item):
+  type = item["baseInfo"]["type"]
+  if type == None:
+    return items["none"]
+  elif type == "inv":
+    if item["baseInfo"]["stacks"]:
+      return {"baseInfo":item["baseInfo"],"stack":item["stack"].copy()}
+  elif type == "hand":
+    if item["first"] == "tool":
+      return {"baseInfo":item["baseInfo"],"first":item["first"],"second":item["second"],"tier":item["tier"],"damage":item["damage"],"durability":item["durability"],"speed":item["speed"]}
+  elif type == "helm":
+    return {"baseInfo":item["baseInfo"]}
 
 def Drop_Table(*args):
   arg = args
@@ -45,28 +66,17 @@ def Drop_Table(*args):
 
 def Pick_Loot(list):
   item = list[(randint(1,len(list))-1)]
-  if item["type"] == None:
-    return item
-  elif item["type"] == "inv":
-    return item
-  elif item["type"] == "hand":
-    if item["first"] == "tool":
-      if item["second"] == "pick":
-        return {"type":"hand","first":"tool","second":"pick","durability":item["durability"],"damage":item["damage"],"invSprite":item["invSprite"],"hotbarSprite":item["hotbarSprite"]}
-      elif item["second"] == "axe":
-        return {"type":"hand","first":"tool","second":"axe","durability":item["durability"],"damage":item["damage"],"invSprite":item["invSprite"],"hotbarSprite":item["hotbarSprite"]}
+  return Convert_Item(item)
 
 
 creatures = {}
 
 floorBlocks = {"grass": {"type":"grass","sprite":pygame.image.load("SV2/sprites/floorBlocks/grass.png").convert_alpha()},
-               "dirt": {"sprite":pygame.image.load("SV2/sprites/floorBlocks/dirt.png").convert_alpha()}}
+               "water": {"type":"water","sprite":pygame.image.load("SV2/sprites/floorBlocks/water.png").convert_alpha()},
+               "dirt": {"type":"dirt","sprite":pygame.image.load("SV2/sprites/floorBlocks/dirt.png").convert_alpha()}}
 
 baseBlocks = {"none":{"type":None,"sprite":None},
-              "rock":{"type":"rock","sprite":pygame.image.load("SV2/sprites/baseBlocks/rock.png").convert_alpha(),"hp":100,"resistance":0.95,"dropTable":[Drop_Table(items["rock"],1),1]}}
-
-roofBlocks = {"none":{"sprite":None},
-              "leaf":{"sprite":pygame.image.load("SV2/sprites/roofBlocks/leaf.png").convert_alpha(),"hp":100,"resistance":0.95,"dropTable":[]}}
+              "rock":{"type":"rock","tier":0,"sprite":pygame.image.load("SV2/sprites/baseBlocks/rock.png").convert_alpha(),"hp":100,"resistance":0.95,"dropTable":[Drop_Table(items["rock"],1,items["none"],1),2]}}
 
 activeBlocks = {"none":{"sprite":None}}
 
@@ -80,32 +90,14 @@ player = {"position": [200,200],
           "hp":[1,100],
           "mana":[1,100],
           "stam":[1,100],
-
           "rightHand":items["none"],
           "leftHand":items["none"],
-
           "helm":items["none"],
           "chest":items["none"],
           "legs":items["none"],
           "boots":items["none"],
           "gloves":items["none"],
-
-          "inventory":[items["pick"],
-                       items["helm"],
-                       items["rock"],
-                       items["none"],
-                       items["none"],
-                       items["none"],
-                       items["none"],
-                       items["none"],
-                       items["none"],
-                       items["none"],
-                       items["none"],
-                       items["none"],
-                       items["none"],
-                       items["none"],
-                       items["none"],
-                       items["none"]]}
+          "inventory":[Convert_Item(items["pick"]),Convert_Item(items["pick"]),items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"]]}
 
 
 def Get_Sprite(sheet,colour,spriteSize):
@@ -115,9 +107,8 @@ def Get_Sprite(sheet,colour,spriteSize):
     sprite.set_colorkey(colour)
     return sprite
 
-def Dis(x1, y1, x2, y2):
+def Dist(x1, y1, x2, y2):
     return sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-
 
 def Get_Chunk(xPos,yPos,mapChunkX,chunkSize):
     chunkX = int(xPos//chunkSize) 
@@ -139,6 +130,9 @@ def Get_Square_Clicked(chunkSize,posClickedX,posClickedY):
    y = ((posClickedY - 508)//64)+player["position"][1]
    return Get_Square(x,y,chunkSize)
 
+def Convert_Blocks(item):
+  newItem = item.copy()
+  return newItem
 
 def Make_Chunks(ChunkSizeX,ChunkSizeY):
     map = []
@@ -147,15 +141,12 @@ def Make_Chunks(ChunkSizeX,ChunkSizeY):
         chunk = []
         for yBlock in range(32):
           for xBlock in range(32):
-
-            floor = {"type":floorBlocks["grass"]["type"],"sprite":floorBlocks["grass"]["sprite"]}
-            base = baseBlocks["none"]
-            roof = roofBlocks["none"]
+            floor = Convert_Blocks(floorBlocks["grass"])
+            base = Convert_Blocks(baseBlocks["none"])
             active = activeBlocks["none"]
             if randint(0,25) == 1:
-              base = {"type":baseBlocks["rock"]["type"],"sprite":baseBlocks["rock"]["sprite"],"hp":baseBlocks["rock"]["hp"],"resistance":baseBlocks["rock"]["resistance"],"dropTable":baseBlocks["rock"]["dropTable"]}
-
-            chunk.append({"blockPosition":[xBlock+(x*32),yBlock+(y*32)],"floorBlock":floor,"baseBlock":base,"roofBlock":roof,"activeBlock":active})
+              base = Convert_Blocks(baseBlocks["rock"])
+            chunk.append({"position":[xBlock+(x*32),yBlock+(y*32)],"floorBlock":floor,"baseBlock":base,"activeBlock":active})
         map.append({"chunkPosition":[x,y],"chunk":chunk})
     return map
 
@@ -175,9 +166,8 @@ def Make_Projectile_Chunks(ChunkSizeX,ChunkSizeY):
         projectileMap.append({"chunkPosition":[x,y],"chunk":chunk})
     return projectileMap
 
-
 def Hotbar_Quick_Change(num,hand):
-    if player["inventory"][num]["type"] == "hand" or player["inventory"][num]["type"] == None:
+    if player["inventory"][num]["baseInfo"]["type"] == "hand" or player["inventory"][num]["baseInfo"]["type"] == None:
       temp = player["inventory"][num]
       player["inventory"][num] = player[hand]
       player[hand] = temp
@@ -222,13 +212,13 @@ def Get_All_Inv_Items(mP):
       num = 14
     elif Get_Inv_Item(1098,1236,678,816,mP):
       num = 15
-    elif Get_Inv_Item(753,891,100,238,mP): # Left Hand
+    elif Get_Inv_Item(753,891,100,238,mP):
       num = 16
-    elif Get_Inv_Item(1029,1167,100,238,mP): # Right Hand
+    elif Get_Inv_Item(1029,1167,100,238,mP):
       num = 17
-    elif Get_Inv_Item(509,647,850,988,mP): # Helm
+    elif Get_Inv_Item(509,647,850,988,mP):
       num = 18
-    elif Get_Inv_Item(700,838,850,988,mP): # Chest
+    elif Get_Inv_Item(700,838,850,988,mP):
       num = 19
     elif Get_Inv_Item(891,1029,850,988,mP):
       num = 20
@@ -241,17 +231,15 @@ def Get_All_Inv_Items(mP):
 
 def Destroy_Item(sec,itemMap):
     for chunk in range(len(itemMap)):
-      for item in range(len(itemMap[chunk-1]["chunk"])):
-        if itemMap[chunk-1]["chunk"][item-1]["timeLeft"] == sec:
-           itemMap[chunk-1]["chunk"].pop(item-1)
+      for item in range(len(itemMap[chunk]["chunk"])):
+        if itemMap[chunk]["chunk"][item]["timeLeft"] == sec:
+           itemMap[chunk]["chunk"].pop(item)
 
-def Drop_Item(mousePos,itemMap,item,sec):
-    if not item["type"] == None: 
-      posX = relativePerspective[0]+mousePos[0]-16
-      posY = relativePerspective[1]+mousePos[1]-16
-      heldInvObject["item"] = items["none"]
-      newMap = itemMap[Get_Chunk(int(posX/64),int(posY/64),mapChunkSize[0],32)]["chunk"].append({"position":[posX,posY],"timeLeft":sec+300,"item":item})
-      return newMap
+def Drop_Item(pos,itemMap,item,sec,size):
+    if not item["baseInfo"]["type"] == None: 
+      posX = pos[0]+(size[0]/2)-16
+      posY = pos[1]+(size[1]/2)-16
+      itemMap[Get_Chunk(int(posX/64),int(posY/64),mapChunkSize[0],32)]["chunk"].append({"position":[posX,posY],"timeLeft":sec+300,"item":item})
 
 def Put_Back():
     if heldInvObject["index"] < 16:
@@ -279,9 +267,54 @@ def Put_Back():
       player["gloves"] = heldInvObject["item"]
       heldInvObject["item"] = items["none"]
 
+def Put_Back_Stack():
+    if heldInvObject["index"] < 16:
+      if player["inventory"][heldInvObject["index"]]["baseInfo"]["type"] == None:
+        player["inventory"][heldInvObject["index"]] = heldInvObject["item"]
+        heldInvObject["item"] = items["none"]  
+      else:  
+        player["inventory"][heldInvObject["index"]]["stack"][0] += heldInvObject["item"]["stack"][0]
+        heldInvObject["item"] = items["none"]  
+    elif heldInvObject["index"] == 16: 
+      if player["leftHand"]["baseInfo"]["type"] == None:
+        player["leftHand"] = heldInvObject["item"]
+        heldInvObject["item"] = items["none"]  
+      else: 
+        player["leftHand"]["stack"][0] += heldInvObject["item"]["stack"][0]
+        heldInvObject["item"] = items["none"]
+    elif heldInvObject["index"] == 17: 
+      if player["rightHand"]["baseInfo"]["type"] == None:
+        player["rightHand"] = heldInvObject["item"]
+        heldInvObject["item"] = items["none"]  
+      else: 
+        player["rightHand"]["stack"][0] += heldInvObject["item"]["stack"][0]
+        heldInvObject["item"] = items["none"]
 
-def Tab_Switch(num,type,mP,itemMap,sec):
+def Small_Put_Back(place):
+    if heldInvObject["index"] < 16:
+      if heldInvObject["item"]["baseInfo"]["type"] == place:
+        player["inventory"][heldInvObject["index"]] = player[place]
+        player[place] = heldInvObject["item"]
+        heldInvObject["item"] = items["none"]
+      else: 
+        Put_Back()
+    else: 
+      Put_Back()
+
+def Small_Put_Back_2(num,place):
+  if player["inventory"][num]["baseInfo"]["type"] == place or player["inventory"][num]["baseInfo"]["type"] == None:
+    if not heldInvObject["item"]["baseInfo"]["type"] == None:
+      player[place] = player["inventory"][num]
+      player["inventory"][num] = heldInvObject["item"]
+      heldInvObject["item"] = items["none"]
+    else: 
+      Put_Back()
+  else: 
+    Put_Back()
+
+def Tab_Switch(num,type,mP,itemMap,sec,shift):
   if type == 0:
+    if leftRightMouseButton[0]:  
       if isinstance(num,int):
           if num < 16:
             heldInvObject["item"] = player["inventory"][num] 
@@ -315,19 +348,92 @@ def Tab_Switch(num,type,mP,itemMap,sec):
             heldInvObject["item"] = player["gloves"] 
             player["gloves"] = items["none"]
             heldInvObject["index"] = num
+    elif leftRightMouseButton[2] and not shift: 
+      if isinstance(num,int):
+          if num < 16 and player["inventory"][num]["baseInfo"]["stacks"]:
+            if not player["inventory"][num]["stack"][0] == 1:
+              stackSize = player["inventory"][num]["stack"][0]
+              if stackSize % 2 == 0:
+                heldInvObject["item"] = Convert_Item(player["inventory"][num])
+                heldInvObject["item"]["stack"][0] = stackSize//2
+                player["inventory"][num]["stack"][0] = stackSize//2
+                heldInvObject["index"] = num
+              elif stackSize % 2 == 1:
+                heldInvObject["item"] = Convert_Item(player["inventory"][num])
+                heldInvObject["item"]["stack"][0] = stackSize//2
+                player["inventory"][num]["stack"][0] = stackSize//2 + 1
+                heldInvObject["index"] = num
+          elif num == 16 and player["leftHand"]["baseInfo"]["stacks"]:
+            stackSize = player["leftHand"]["stack"][0]
+            if stackSize % 2 == 0:
+              heldInvObject["item"] = Convert_Item(player["leftHand"])
+              heldInvObject["item"]["stack"][0] = stackSize//2
+              player["leftHand"]["stack"][0] = stackSize//2
+              heldInvObject["index"] = num
+            elif stackSize % 2 == 1:
+              heldInvObject["item"] = Convert_Item(player["leftHand"])
+              heldInvObject["item"]["stack"][0] = stackSize//2
+              player["leftHand"]["stack"][0] = stackSize//2 + 1
+              heldInvObject["index"] = num
+          elif num == 17 and player["rightHand"]["baseInfo"]["stacks"]:
+            stackSize = player["rightHand"]["stack"][0]
+            if stackSize % 2 == 0:
+              heldInvObject["item"] = Convert_Item(player["rightHand"])
+              heldInvObject["item"]["stack"][0] = stackSize//2
+              player["rightHand"]["stack"][0] = stackSize//2
+              heldInvObject["index"] = num
+            elif stackSize % 2 == 1:
+              heldInvObject["item"] = Convert_Item(player["rightHand"])
+              heldInvObject["item"]["stack"][0] = stackSize//2
+              player["rightHand"]["stack"][0] = stackSize//2 + 1
+              heldInvObject["index"] = num
+    elif leftRightMouseButton[2] and shift: 
+      if isinstance(num,int):
+        if num < 16 and player["inventory"][num]["baseInfo"]["stacks"]:
+          if not player["inventory"][num]["stack"][0] == 1:
+            heldInvObject["item"] = Convert_Item(player["inventory"][num])
+            heldInvObject["item"]["stack"][0] = 1
+            player["inventory"][num]["stack"][0] -= 1
+            heldInvObject["index"] = num
+        elif num == 16 and player["leftHand"]["baseInfo"]["stacks"]:
+          if not player["leftHand"][num]["stack"][0] == 1:
+            heldInvObject["item"] = Convert_Item(player["leftHand"]) 
+            heldInvObject["item"]["stack"][0] = 1
+            player["leftHand"]["stack"][0] -= 1
+            heldInvObject["index"] = num
+        elif num == 17 and player["rightHand"]["baseInfo"]["stacks"]:
+          if not player["rightHand"][num]["stack"][0] == 1:
+            heldInvObject["item"] = Convert_Item(player["rightHand"]) 
+            heldInvObject["item"]["stack"][0] = 1
+            player["rightHand"]["stack"][0] -= 1
+            heldInvObject["index"] = num
   if type == 1:
+    if leftRightMouseButton[0]: 
       if isinstance(num,int):
                 if num < 16:
                   if heldInvObject["index"] < 16:
-                    if not heldInvObject["item"]["type"] == None:
-                      player["inventory"][heldInvObject["index"]] = player["inventory"][num]
-                      player["inventory"][num] = heldInvObject["item"]
-                      heldInvObject["item"] = items["none"]
+                    if not heldInvObject["item"]["baseInfo"]["type"] == None:
+                      if heldInvObject["item"]["baseInfo"]["name"] == player["inventory"][num]["baseInfo"]["name"] and heldInvObject["item"]["baseInfo"]["stacks"]:
+                        if player["inventory"][num]["stack"][0] < player["inventory"][num]["stack"][1]:
+                          if player["inventory"][num]["stack"][0] + heldInvObject["item"]["stack"][0] <= player["inventory"][num]["stack"][1]:
+                            player["inventory"][num]["stack"][0] += heldInvObject["item"]["stack"][0]
+                            heldInvObject["item"] = items["none"]
+                          else:
+                            change = player["inventory"][num]["stack"][1] - player["inventory"][num]["stack"][0]
+                            player["inventory"][num]["stack"][0] = player["inventory"][num]["stack"][1]
+                            heldInvObject["item"]["stack"][0] -= change
+                            Put_Back_Stack()
+                        else:
+                          Put_Back_Stack()
+                      else:
+                        player["inventory"][heldInvObject["index"]] = player["inventory"][num]
+                        player["inventory"][num] = heldInvObject["item"]
+                        heldInvObject["item"] = items["none"]
                     else:
                       Put_Back()
                   elif heldInvObject["index"] == 16: 
-                    if player["inventory"][num]["type"] == "hand" or player["inventory"][num]["type"] == None:
-                      if not heldInvObject["item"]["type"] == None:
+                    if player["inventory"][num]["baseInfo"]["type"] == "hand" or player["inventory"][num]["baseInfo"]["type"] == None:
+                      if not heldInvObject["item"]["baseInfo"]["type"] == None:
                         player["leftHand"] = player["inventory"][num]
                         player["inventory"][num] = heldInvObject["item"]
                         heldInvObject["item"] = items["none"]
@@ -336,8 +442,8 @@ def Tab_Switch(num,type,mP,itemMap,sec):
                     else: 
                       Put_Back()
                   elif heldInvObject["index"] == 17: 
-                    if player["inventory"][num]["type"] == "hand" or player["inventory"][num]["type"] == None:
-                      if not heldInvObject["item"]["type"] == None:
+                    if player["inventory"][num]["baseInfo"]["type"] == "hand" or player["inventory"][num]["baseInfo"]["type"] == None:
+                      if not heldInvObject["item"]["baseInfo"]["type"] == None:
                         player["rightHand"] = player["inventory"][num]
                         player["inventory"][num] = heldInvObject["item"]
                         heldInvObject["item"] = items["none"]
@@ -346,65 +452,25 @@ def Tab_Switch(num,type,mP,itemMap,sec):
                     else: 
                       Put_Back()
                   elif heldInvObject["index"] == 18: 
-                    if player["inventory"][num]["type"] == "helm" or player["inventory"][num]["type"] == None:
-                      if not heldInvObject["item"]["type"] == None:
-                        player["helm"] = player["inventory"][num]
-                        player["inventory"][num] = heldInvObject["item"]
-                        heldInvObject["item"] = items["none"]
-                      else: 
-                        Put_Back()
-                    else: 
-                      Put_Back()
+                    Small_Put_Back_2(num,"helm")
                   elif heldInvObject["index"] == 19: 
-                    if player["inventory"][num]["type"] == "chest" or player["inventory"][num]["type"] == None:
-                      if not heldInvObject["item"]["type"] == None:
-                        player["chest"] = player["inventory"][num]
-                        player["inventory"][num] = heldInvObject["item"]
-                        heldInvObject["item"] = items["none"]
-                      else: 
-                        Put_Back()
-                    else: 
-                      Put_Back()
+                    Small_Put_Back_2(num,"chest")
                   elif heldInvObject["index"] == 20: 
-                    if player["inventory"][num]["type"] == "legs" or player["inventory"][num]["type"] == None:
-                      if not heldInvObject["item"]["type"] == None:
-                        player["legs"] = player["inventory"][num]
-                        player["inventory"][num] = heldInvObject["item"]
-                        heldInvObject["item"] = items["none"]
-                      else: 
-                        Put_Back()
-                    else: 
-                      Put_Back()
+                    Small_Put_Back_2(num,"legs")
                   elif heldInvObject["index"] == 21: 
-                    if player["inventory"][num]["type"] == "boots" or player["inventory"][num]["type"] == None:
-                      if not heldInvObject["item"]["type"] == None:
-                        player["boots"] = player["inventory"][num]
-                        player["inventory"][num] = heldInvObject["item"]
-                        heldInvObject["item"] = items["none"]
-                      else: 
-                        Put_Back()
-                    else: 
-                      Put_Back()
+                    Small_Put_Back_2(num,"boots")
                   elif heldInvObject["index"] == 22: 
-                    if player["inventory"][num]["type"] == "gloves" or player["inventory"][num]["type"] == None:
-                      if not heldInvObject["item"]["type"] == None:
-                        player["gloves"] = player["inventory"][num]
-                        player["inventory"][num] = heldInvObject["item"]
-                        heldInvObject["item"] = items["none"]
-                      else: 
-                        Put_Back()
-                    else: 
-                      Put_Back()
+                    Small_Put_Back_2(num,"gloves")
                 elif num == 16:
                   if heldInvObject["index"] < 16:
-                    if heldInvObject["item"]["type"] == "hand":
+                    if heldInvObject["item"]["baseInfo"]["type"] == "hand":
                       player["inventory"][heldInvObject["index"]] = player["leftHand"]
                       player["leftHand"] = heldInvObject["item"]
                       heldInvObject["item"] = items["none"]
                     else: 
                       Put_Back()
                   elif heldInvObject["index"] == 17:
-                    if not heldInvObject["item"]["type"] == None:
+                    if not heldInvObject["item"]["baseInfo"]["type"] == None:
                       player["rightHand"] = player["leftHand"]
                       player["leftHand"] = heldInvObject["item"]
                       heldInvObject["item"] = items["none"]
@@ -414,14 +480,14 @@ def Tab_Switch(num,type,mP,itemMap,sec):
                     Put_Back()
                 elif num == 17:
                   if heldInvObject["index"] < 16:
-                    if heldInvObject["item"]["type"] == "hand":
+                    if heldInvObject["item"]["baseInfo"]["type"] == "hand":
                       player["inventory"][heldInvObject["index"]] = player["rightHand"]
                       player["rightHand"] = heldInvObject["item"]
                       heldInvObject["item"] = items["none"]
                     else: 
                       Put_Back()
                   elif heldInvObject["index"] == 16:
-                    if not heldInvObject["item"]["type"] == None:
+                    if not heldInvObject["item"]["baseInfo"]["type"] == None:
                       player["leftHand"] = player["rightHand"]
                       player["rightHand"] = heldInvObject["item"]
                       heldInvObject["item"] = items["none"]
@@ -430,59 +496,107 @@ def Tab_Switch(num,type,mP,itemMap,sec):
                   else: 
                     Put_Back()
                 elif num == 18:
-                  if heldInvObject["index"] < 16:
-                    if heldInvObject["item"]["type"] == "helm":
-                      player["inventory"][heldInvObject["index"]] = player["helm"]
-                      player["helm"] = heldInvObject["item"]
-                      heldInvObject["item"] = items["none"]
-                    else: 
-                      Put_Back()
-                  else: 
-                      Put_Back()
+                  Small_Put_Back("helm")
                 elif num == 19:
-                  if heldInvObject["index"] < 16:
-                    if heldInvObject["item"]["type"] == "chest":
-                      player["inventory"][heldInvObject["index"]] = player["chest"]
-                      player["chest"] = heldInvObject["item"]
-                      heldInvObject["item"] = items["none"]
-                    else: 
-                      Put_Back()
-                  else: 
-                      Put_Back()
+                  Small_Put_Back("chest")
                 elif num == 20:
-                  if heldInvObject["index"] < 16:
-                    if heldInvObject["item"]["type"] == "legs":
-                      player["inventory"][heldInvObject["index"]] = player["legs"]
-                      player["legs"] = heldInvObject["item"]
-                      heldInvObject["item"] = items["none"]
-                    else: 
-                      Put_Back()
-                  else: 
-                      Put_Back()
+                  Small_Put_Back("legs")
                 elif num == 21:
-                  if heldInvObject["index"] < 16:
-                    if heldInvObject["item"]["type"] == "boots":
-                      player["inventory"][heldInvObject["index"]] = player["boots"]
-                      player["boots"] = heldInvObject["item"]
-                      heldInvObject["item"] = items["none"]
-                    else: 
-                      Put_Back()
-                  else: 
-                      Put_Back()
+                  Small_Put_Back("boots")
                 elif num == 22:
-                  if heldInvObject["index"] < 16:
-                    if heldInvObject["item"]["type"] == "gloves":
-                      player["inventory"][heldInvObject["index"]] = player["gloves"]
-                      player["gloves"] = heldInvObject["item"]
-                      heldInvObject["item"] = items["none"]
-                    else: 
-                      Put_Back()
-                  else: 
-                      Put_Back()
+                  Small_Put_Back("gloves")
       else: 
-        if not heldInvObject["item"]["type"] == None:
-          itemMap = Drop_Item(mP,itemMap,heldInvObject["item"],sec)
+        if not heldInvObject["item"]["baseInfo"]["type"] == None:
+          itemMap = Drop_Item((mP[0]+relativePerspective[0]-16,mP[1]+relativePerspective[1]-16),itemMap,heldInvObject["item"],sec,[32,32])
+          heldInvObject["item"] = items["none"]
+    elif leftRightMouseButton[2]:
+      if isinstance(num,int):
+        if num < 16:
+          if player["inventory"][num]["baseInfo"]["type"] == None:
+            player["inventory"][num] = heldInvObject["item"]
+            heldInvObject["item"] = items["none"]
+          elif player["inventory"][num]["baseInfo"]["name"] == heldInvObject["item"]["baseInfo"]["name"]:
+            if player["inventory"][num]["stack"][0] < player["inventory"][num]["stack"][1]:
+              if player["inventory"][num]["stack"][0] + heldInvObject["item"]["stack"][0] <= player["inventory"][num]["stack"][1]:
+                player["inventory"][num]["stack"][0] += heldInvObject["item"]["stack"][0]
+                heldInvObject["item"] = items["none"]
+              else:
+                change = player["inventory"][num]["stack"][1] - player["inventory"][num]["stack"][0]
+                player["inventory"][num]["stack"][0] = player["inventory"][num]["stack"][1]
+                heldInvObject["item"]["stack"][0] -= change
+                Put_Back_Stack()
+            else:
+              Put_Back_Stack()
+          else:
+            Put_Back_Stack()
+        if num == 16:
+          if player["leftHand"]["baseInfo"]["type"] == None:
+            if heldInvObject["item"]["baseInfo"]["type"] == "hand":
+              player["leftHand"] = heldInvObject["item"]
+              heldInvObject["item"] = items["none"]
+            else:
+              Put_Back_Stack()
+          elif player["leftHand"]["baseInfo"]["name"] == heldInvObject["item"]["baseInfo"]["name"]:
+            if player["leftHand"]["stack"][0] < player["leftHand"]["stack"][1]:
+              if player["leftHand"]["stack"][0] + heldInvObject["item"]["stack"][0] <= player["leftHand"]["stack"][1]:
+                player["leftHand"]["stack"][0] += heldInvObject["item"]["stack"][0]
+                heldInvObject["item"] = items["none"]
+              else:
+                change = player["leftHand"]["stack"][1] - player["leftHand"]["stack"][0]
+                player["leftHand"]["stack"][0] = player["leftHand"]["stack"][1]
+                heldInvObject["item"]["stack"][0] -= change
+                Put_Back_Stack()
+            else:
+              Put_Back_Stack()
+        if num == 17:
+          if player["rightHand"]["baseInfo"]["type"] == None:
+            if heldInvObject["item"]["baseInfo"]["type"] == "hand":
+              player["rightHand"] = heldInvObject["item"]
+              heldInvObject["item"] = items["none"]
+            else:
+              Put_Back_Stack()
+          elif player["rightHand"]["baseInfo"]["name"] == heldInvObject["item"]["baseInfo"]["name"]:
+            if player["rightHand"]["stack"][0] < player["rightHand"]["stack"][1]:
+              if player["rightHand"]["stack"][0] + heldInvObject["item"]["stack"][0] <= player["rightHand"]["stack"][1]:
+                player["rightHand"]["stack"][0] += heldInvObject["item"]["stack"][0]
+                heldInvObject["item"] = items["none"]
+              else:
+                change = player["rightHand"]["stack"][1] - player["rightHand"]["stack"][0]
+                player["rightHand"]["stack"][0] = player["rightHand"]["stack"][1]
+                heldInvObject["item"]["stack"][0] -= change
+                Put_Back_Stack()
+            else:
+              Put_Back_Stack()
+        else:
+            Put_Back_Stack()
+      else: 
+        if not heldInvObject["item"]["baseInfo"]["type"] == None:
+          itemMap = Drop_Item((mP[0]+relativePerspective[0]-16,mP[1]+relativePerspective[1]-16),itemMap,heldInvObject["item"],sec,[32,32])
+          heldInvObject["item"] = items["none"]
+        
 
+
+def Destroy_BaseBlock(mP,hand,map,itemMap,sec,blockType):
+   object = map[Get_Chunk_Clicked(mapChunkSize[0],32,int(mP[0]),int(mP[1]))]["chunk"][Get_Square_Clicked(32,int(mP[0]),int(mP[1]))]
+   if not object["baseBlock"]["type"] == None:
+    if object["baseBlock"]["type"] == blockType and player[hand]["tier"] >= object["baseBlock"]["tier"] and Dist(object["position"][0],object["position"][1],player["position"][0],player["position"][1]) <= 4:
+      player[hand]["durability"] -= 1
+      map[Get_Chunk_Clicked(mapChunkSize[0],32,int(mP[0]),int(mP[1]))]["chunk"][Get_Square_Clicked(32,int(mP[0]),int(mP[1]))]["baseBlock"]["hp"] -= player[hand]["damage"]*object["baseBlock"]["resistance"]
+      if player[hand]["durability"] <= 0:
+        player[hand] = items["none"]
+      if map[Get_Chunk_Clicked(mapChunkSize[0],32,int(mP[0]),int(mP[1]))]["chunk"][Get_Square_Clicked(32,int(mP[0]),int(mP[1]))]["baseBlock"]["hp"] <= 0:
+        for item in range(object["baseBlock"]["dropTable"][1]):
+          Drop_Item((object["position"][0]*64+randint(-16,16),object["position"][1]*64+randint(-16,16)),itemMap,Pick_Loot(object["baseBlock"]["dropTable"][0]),sec,[64,64]) 
+        map[Get_Chunk_Clicked(mapChunkSize[0],32,int(mP[0]),int(mP[1]))]["chunk"][Get_Square_Clicked(32,int(mP[0]),int(mP[1]))]["baseBlock"] = baseBlocks["none"]
+
+def Use_Hand_Item(mP,hand,LRNum,map,itemMap,sec):
+  if (LRNum[0] and hand == "leftHand") or (LRNum[2] and hand == "rightHand"):
+    if player[hand]["baseInfo"]["type"] == "hand":
+      if player[hand]["first"] == "tool":
+        if player[hand]["second"] == "pick":
+          Destroy_BaseBlock(mP,hand,map,itemMap,sec,"rock")
+        elif player[hand]["second"] == "axe":
+          Destroy_BaseBlock(mP,hand,map,itemMap,sec,"wood")
 
 def Get_Keyboard_Events_Editor_Mode():
     global running
@@ -493,9 +607,6 @@ def Get_Keyboard_Events_Editor_Mode():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
           running = False
-        if event.type == pygame.KEYDOWN:
-          if event.key == pygame.K_ESCAPE:
-            running = False
         if event.type == pygame.MOUSEBUTTONDOWN and state == "up":
             tempMousePosition = pygame.mouse.get_pos()
             state = 'down'
@@ -511,67 +622,36 @@ def Get_Keyboard_Events_Editor_Mode():
         if event.type == pygame.MOUSEBUTTONUP:
             state = 'up'
         
-def Get_Keyboard_Events_Single_Player_Mode(map,itemMap,sec):
+def Get_Keyboard_Events_Single_Player_Mode(map,itemMap,sec,tick):
     global running
     global mousePosition
     global tempMousePosition
     global relativePerspective
     global state
     global invOn
+    global leftRightMouseButton
+    global shift
+    global w
+    global a
+    global s
+    global d
+
     for event in pygame.event.get():
-        
+
         if event.type == pygame.QUIT:
           running = False
 
-        if event.type == pygame.MOUSEBUTTONDOWN and state == "up": ### TAB
-          state = 'down'
-          mP = pygame.mouse.get_pos()
-          leftRightMouseButton = pygame.mouse.get_pressed()
-
-          if invOn:
-            num = Get_All_Inv_Items(mP)
-            Tab_Switch(num,0,mP,itemMap,sec)
-
-          elif not invOn:
-            if leftRightMouseButton[0]:
-              if map[Get_Chunk_Clicked(mapChunkSize[0],32,int(mP[0]),int(mP[1]))]["chunk"][Get_Square_Clicked(32,int(mP[0]),int(mP[1]))]["baseBlock"]["type"] == "rock":
-                if player["leftHand"]["type"] == "hand":
-                  if player["leftHand"]["second"] == "pick":
-                    player["leftHand"]["durability"] -= 1
-                    map[Get_Chunk_Clicked(mapChunkSize[0],32,int(mP[0]),int(mP[1]))]["chunk"][Get_Square_Clicked(32,int(mP[0]),int(mP[1]))]["baseBlock"]["hp"] -= player["leftHand"]["damage"]*map[Get_Chunk_Clicked(mapChunkSize[0],32,int(mP[0]),int(mP[1]))]["chunk"][Get_Square_Clicked(32,int(mP[0]),int(mP[1]))]["baseBlock"]["resistance"]
-                    if player["leftHand"]["durability"] <= 0:
-                      player["leftHand"] = items["none"]
-                    if map[Get_Chunk_Clicked(mapChunkSize[0],32,int(mP[0]),int(mP[1]))]["chunk"][Get_Square_Clicked(32,int(mP[0]),int(mP[1]))]["baseBlock"]["hp"] <= 0:
-                      for item in range(map[Get_Chunk_Clicked(mapChunkSize[0],32,int(mP[0]),int(mP[1]))]["chunk"][Get_Square_Clicked(32,int(mP[0]),int(mP[1]))]["baseBlock"]["dropTable"][1]):
-                        Drop_Item(mP,itemMap,Pick_Loot(map[Get_Chunk_Clicked(mapChunkSize[0],32,int(mP[0]),int(mP[1]))]["chunk"][Get_Square_Clicked(32,int(mP[0]),int(mP[1]))]["baseBlock"]["dropTable"][0]),sec) 
-                      map[Get_Chunk_Clicked(mapChunkSize[0],32,int(mP[0]),int(mP[1]))]["chunk"][Get_Square_Clicked(32,int(mP[0]),int(mP[1]))]["baseBlock"] = baseBlocks["none"]
-            if leftRightMouseButton[2]:
-               if map[Get_Chunk_Clicked(mapChunkSize[0],32,int(mP[0]),int(mP[1]))]["chunk"][Get_Square_Clicked(32,int(mP[0]),int(mP[1]))]["baseBlock"]["type"] == "rock":
-                if player["rightHand"]["type"] == "hand":
-                  if player["rightHand"]["second"] == "pick":
-                    player["rightHand"]["durability"] -= 1
-                    map[Get_Chunk_Clicked(mapChunkSize[0],32,int(mP[0]),int(mP[1]))]["chunk"][Get_Square_Clicked(32,int(mP[0]),int(mP[1]))]["baseBlock"]["hp"] -= player["rightHand"]["damage"]*map[Get_Chunk_Clicked(mapChunkSize[0],32,int(mP[0]),int(mP[1]))]["chunk"][Get_Square_Clicked(32,int(mP[0]),int(mP[1]))]["baseBlock"]["resistance"]
-                    if player["rightHand"]["durability"] <= 0:
-                      player["rightHand"] = items["none"]
-                    if map[Get_Chunk_Clicked(mapChunkSize[0],32,int(mP[0]),int(mP[1]))]["chunk"][Get_Square_Clicked(32,int(mP[0]),int(mP[1]))]["baseBlock"]["hp"] <= 0:
-                      for item in range(map[Get_Chunk_Clicked(mapChunkSize[0],32,int(mP[0]),int(mP[1]))]["chunk"][Get_Square_Clicked(32,int(mP[0]),int(mP[1]))]["baseBlock"]["dropTable"][1]):
-                        Drop_Item(mP,itemMap,Pick_Loot(map[Get_Chunk_Clicked(mapChunkSize[0],32,int(mP[0]),int(mP[1]))]["chunk"][Get_Square_Clicked(32,int(mP[0]),int(mP[1]))]["baseBlock"]["dropTable"][0]),sec) 
-                      map[Get_Chunk_Clicked(mapChunkSize[0],32,int(mP[0]),int(mP[1]))]["chunk"][Get_Square_Clicked(32,int(mP[0]),int(mP[1]))]["baseBlock"] = baseBlocks["none"]
-
-                 
-        elif state == "down":
-          mP = pygame.mouse.get_pos()
-
-        if event.type == pygame.MOUSEBUTTONUP and state == "down":
-            state = 'up'
-            mP = pygame.mouse.get_pos()
-            if invOn and not heldInvObject["item"] == items["none"]:
-              num = Get_All_Inv_Items(mP)
-              Tab_Switch(num,1,mP,itemMap,sec)
-
         if event.type == pygame.KEYDOWN:
-          if event.key == pygame.K_ESCAPE:
-            running = False
+          if event.key == pygame.K_LSHIFT:
+            shift = True
+          if event.key == pygame.K_w:
+            w = True
+          if event.key == pygame.K_a:
+            a = True
+          if event.key == pygame.K_s:
+            s = True
+          if event.key == pygame.K_d:
+            d = True
 
           if event.key == pygame.K_TAB and invOn: ### TAB
              invOn = False
@@ -587,36 +667,96 @@ def Get_Keyboard_Events_Single_Player_Mode(map,itemMap,sec):
           if event.key == pygame.K_4 and not invOn:
              Hotbar_Quick_Change(3,"rightHand")
 
-          if event.key == pygame.K_w and player["position"][1] > 0 and player["stam"][0] > 15:
-            if map[Get_Chunk(player["position"][0],player["position"][1]-1,mapChunkSize[0],32)]["chunk"][Get_Square(player["position"][0],player['position'][1]-1,32)]["baseBlock"]["sprite"] == None:
-              player["position"][1] -= 1
-              player["stam"][0] -= 15
-          if event.key == pygame.K_a and player["position"][0] > 0 and player["stam"][0] > 15:
-            if map[Get_Chunk(player["position"][0]-1,player["position"][1],mapChunkSize[0],32)]["chunk"][Get_Square(player["position"][0]-1,player['position'][1],32)]["baseBlock"]["sprite"] == None:
-              player["position"][0] -= 1
-              player["stam"][0] -= 15
-          if event.key == pygame.K_s and player["position"][1] < mapChunkSize[1]*32-1 and player["stam"][0] > 15:
-            if map[Get_Chunk(player["position"][0],player["position"][1]+1,mapChunkSize[0],32)]["chunk"][Get_Square(player["position"][0],player['position'][1]+1,32)]["baseBlock"]["sprite"] == None:
-              player["position"][1] += 1
-              player["stam"][0] -= 15
-          if event.key == pygame.K_d and player["position"][0] < mapChunkSize[0]*32-1 and player["stam"][0] > 15: 
-            if map[Get_Chunk(player["position"][0]+1,player["position"][1],mapChunkSize[0],32)]["chunk"][Get_Square(player["position"][0]+1,player['position'][1],32)]["baseBlock"]["sprite"] == None:
-              player["position"][0] += 1
-              player["stam"][0] -= 15
+        if event.type == pygame.MOUSEBUTTONDOWN and state == "up": ### TAB
+          state = 'down'
+          mP = pygame.mouse.get_pos()
+          leftRightMouseButton = pygame.mouse.get_pressed()
+
+          if invOn:
+            num = Get_All_Inv_Items(mP)
+            Tab_Switch(num,0,mP,itemMap,sec,shift)
+
+        if event.type == pygame.MOUSEBUTTONUP and state == "down":
+            state = 'up'
+            mP = pygame.mouse.get_pos()
+            if invOn and not heldInvObject["item"] == items["none"]:
+              num = Get_All_Inv_Items(mP)
+              Tab_Switch(num,1,mP,itemMap,sec,shift)
+              
+
+        if event.type == pygame.KEYUP:
+          if event.key == pygame.K_LSHIFT:
+            shift = False
+          if event.key == pygame.K_w:
+            w = False
+          if event.key == pygame.K_a:
+            a = False
+          if event.key == pygame.K_s:
+            s = False
+          if event.key == pygame.K_d:
+            d = False
+
+    if tick % 10 == 0:
+      if w and a and player["position"][1] > 0 and player["position"][0] > 0 and player["stam"][0] > 6.5:
+        if map[Get_Chunk(player["position"][0]-1,player["position"][1]-1,mapChunkSize[0],32)]["chunk"][Get_Square(player["position"][0]-1,player['position'][1]-1,32)]["baseBlock"]["sprite"] == None:
+          player["position"][1] -= 1
+          player["position"][0] -= 1
+          player["stam"][0] -= 6.5
+      elif w and d and player["position"][1] > 0 and player["position"][0] < mapChunkSize[0]*32-1 and player["stam"][0] > 6.5:
+        if map[Get_Chunk(player["position"][0]+1,player["position"][1]-1,mapChunkSize[0],32)]["chunk"][Get_Square(player["position"][0]+1,player['position'][1]-1,32)]["baseBlock"]["sprite"] == None:
+          player["position"][1] -= 1
+          player["position"][0] += 1
+          player["stam"][0] -= 6.5
+      elif s and a and player["position"][1] < mapChunkSize[1]*32-1 and player["position"][0] > 0 and player["stam"][0] > 6.5:
+        if map[Get_Chunk(player["position"][0]-1,player["position"][1]+1,mapChunkSize[0],32)]["chunk"][Get_Square(player["position"][0]-1,player['position'][1]+1,32)]["baseBlock"]["sprite"] == None:
+          player["position"][1] += 1
+          player["position"][0] -= 1
+          player["stam"][0] -= 6.5
+      elif s and d and player["position"][0] < mapChunkSize[0]*32-1 and player["position"][1] < mapChunkSize[0]*32-1  and player["stam"][0] > 6.5: 
+        if map[Get_Chunk(player["position"][0]+1,player["position"][1]+1,mapChunkSize[0],32)]["chunk"][Get_Square(player["position"][0]+1,player['position'][1]+1,32)]["baseBlock"]["sprite"] == None:
+          player["position"][1] += 1
+          player["position"][0] += 1
+          player["stam"][0] -= 6.5
+      elif w and player["position"][1] > 0 and player["stam"][0] > 6.5:
+        if map[Get_Chunk(player["position"][0],player["position"][1]-1,mapChunkSize[0],32)]["chunk"][Get_Square(player["position"][0],player['position'][1]-1,32)]["baseBlock"]["sprite"] == None:
+          player["position"][1] -= 1
+          player["stam"][0] -= 6.5
+      elif a and player["position"][0] > 0 and player["stam"][0] > 6.5:
+        if map[Get_Chunk(player["position"][0]-1,player["position"][1],mapChunkSize[0],32)]["chunk"][Get_Square(player["position"][0]-1,player['position'][1],32)]["baseBlock"]["sprite"] == None:
+          player["position"][0] -= 1
+          player["stam"][0] -= 6.5
+      elif s and player["position"][1] < mapChunkSize[1]*32-1 and player["stam"][0] > 6.5:
+        if map[Get_Chunk(player["position"][0],player["position"][1]+1,mapChunkSize[0],32)]["chunk"][Get_Square(player["position"][0],player['position'][1]+1,32)]["baseBlock"]["sprite"] == None:
+          player["position"][1] += 1
+          player["stam"][0] -= 6.5
+      elif d and player["position"][0] < mapChunkSize[0]*32-1 and player["stam"][0] > 6.5: 
+        if map[Get_Chunk(player["position"][0]+1,player["position"][1],mapChunkSize[0],32)]["chunk"][Get_Square(player["position"][0]+1,player['position'][1],32)]["baseBlock"]["sprite"] == None:
+          player["position"][0] += 1
+          player["stam"][0] -= 6.5
+
+    if state == "down":
+          mP = pygame.mouse.get_pos()
+          leftRightMouseButton = pygame.mouse.get_pressed()
+          if not invOn:
+            if not player["leftHand"]["baseInfo"]["type"] == None:
+              if tick % player["leftHand"]["speed"] == 0:
+                Use_Hand_Item(mP,"leftHand",leftRightMouseButton,map,itemMap,sec)
+            if not player["rightHand"]["baseInfo"]["type"] == None:
+              if tick % player["rightHand"]["speed"] == 0:
+                Use_Hand_Item(mP,"rightHand",leftRightMouseButton,map,itemMap,sec)
+          
     relativePerspective[0] = player["position"][0]*64-928
     relativePerspective[1] = player["position"][1]*64-508
   
-
 def Draw_Chunk(chunk):
     global floorBlocks
     global baseBlocks
-    global roofBlocks
     global relativePerspective
     for block in range(1024):
-       if chunk["chunk"][block]["blockPosition"][0]*64-relativePerspective[0] >= -64 and chunk["chunk"][block]["blockPosition"][0]*64-relativePerspective[0] <= WIDTH and chunk["chunk"][block]["blockPosition"][1]*64-relativePerspective[1] >= -64 and chunk["chunk"][block]["blockPosition"][1]*64-relativePerspective[1] <= HEIGHT:
-          Win.blit(Get_Sprite(chunk["chunk"][block]["floorBlock"]["sprite"],(0,0,0),64),((chunk["chunk"][block]["blockPosition"][0]*64-relativePerspective[0],chunk["chunk"][block]["blockPosition"][1]*64-relativePerspective[1])))
+       if chunk["chunk"][block]["position"][0]*64-relativePerspective[0] >= -64 and chunk["chunk"][block]["position"][0]*64-relativePerspective[0] <= WIDTH and chunk["chunk"][block]["position"][1]*64-relativePerspective[1] >= -64 and chunk["chunk"][block]["position"][1]*64-relativePerspective[1] <= HEIGHT:
+          Win.blit(Get_Sprite(chunk["chunk"][block]["floorBlock"]["sprite"],(0,0,0),64),((chunk["chunk"][block]["position"][0]*64-relativePerspective[0],chunk["chunk"][block]["position"][1]*64-relativePerspective[1])))
           if not chunk["chunk"][block]["baseBlock"]["sprite"] == None:
-            Win.blit(Get_Sprite(chunk["chunk"][block]["baseBlock"]["sprite"],(0,0,0),64),((chunk["chunk"][block]["blockPosition"][0]*64-relativePerspective[0],chunk["chunk"][block]["blockPosition"][1]*64-relativePerspective[1])))
+            Win.blit(Get_Sprite(chunk["chunk"][block]["baseBlock"]["sprite"],(0,0,0),64),((chunk["chunk"][block]["position"][0]*64-relativePerspective[0],chunk["chunk"][block]["position"][1]*64-relativePerspective[1])))
 
 def Draw_Screen(map):
     for chunk in map:
@@ -625,69 +765,84 @@ def Draw_Screen(map):
       if (chunk["chunkPosition"][0] < relX+1 and chunk["chunkPosition"][0] > relX-1) and (chunk["chunkPosition"][1] < relY+1 and chunk["chunkPosition"][1] > relY-1):
         Draw_Chunk(chunk)
 
-def Item_Pick_Up(chunk,item):
-  if Dis(chunk["chunk"][item-1]["position"][0],chunk["chunk"][item-1]["position"][1],player["position"][0]*64,player["position"][1]*64) < 75:
+def Item_Pick_Up_Non_Stacked(chunk,item):
+  if Dist(chunk["chunk"][item]["position"][0],chunk["chunk"][item]["position"][1],player["position"][0]*64,player["position"][1]*64) < 75:
     for run in range(16):
       if player["inventory"][run] == items["none"]:
-        print(player["inventory"][run])
-        player["inventory"][run] = chunk["chunk"][item-1]["item"]
-        chunk["chunk"].pop(item-1)
-        break
+        player["inventory"][run] = chunk["chunk"][item]["item"]
+        chunk["chunk"].pop(item)
+        return -1
+    return 0
+  return 0
+
+def Item_Pick_Up_Stacked(chunk,item):
+  global player
+  if Dist(chunk["chunk"][item]["position"][0],chunk["chunk"][item]["position"][1],player["position"][0]*64,player["position"][1]*64) < 75:
+    for run in range(16):
+      if player["inventory"][run]["baseInfo"] == chunk["chunk"][item]["item"]["baseInfo"]:
+        if chunk["chunk"][item]["item"]["stack"][0] + player["inventory"][run]["stack"][0] <= player["inventory"][run]["stack"][1]:
+          object = player["inventory"][run]["stack"][0] + chunk["chunk"][item]["item"]["stack"][0]
+          player["inventory"][run]["stack"][0] = object
+          chunk["chunk"].pop(item)
+          return -1
+        else:
+          change = player["inventory"][run]["stack"][1] - player["inventory"][run]["stack"][0]
+          player["inventory"][run]["stack"][0] = player["inventory"][run]["stack"][1]
+          chunk["chunk"][item]["item"]["stack"][0] -= change
+    for run in range(16):
+      if player["inventory"][run] == items["none"]:
+        player["inventory"][run] = chunk["chunk"][item]["item"]
+        chunk["chunk"].pop(item)
+        return -1
+    return 0
+  return 0
+
+def Pick_up_item(chunk):
+  minus = 0
+  if len(chunk["chunk"]) > 0:
+      for item in range(len(chunk["chunk"])):
+        if chunk["chunk"][item+minus]["position"][0]-relativePerspective[0] >= -32 and chunk["chunk"][item+minus]["position"][0]-relativePerspective[0] <= WIDTH and chunk["chunk"][item+minus]["position"][1]-relativePerspective[1] >= -32 and chunk["chunk"][item+minus]["position"][1]-relativePerspective[1] <= HEIGHT:
+          if chunk["chunk"][item+minus]["item"]["baseInfo"]["stacks"] == False:
+            minus += Item_Pick_Up_Non_Stacked(chunk,item+minus)
+          elif chunk["chunk"][item+minus]["item"]["baseInfo"]["stacks"] == True:
+            minus += Item_Pick_Up_Stacked(chunk,item+minus)
+
 
 def Draw_Item_Chunk(chunk):
     global player
     global relativePerspective
     if len(chunk["chunk"]) > 0:
       for item in range(len(chunk["chunk"])):
-        if chunk["chunk"][item-1]["position"][0]-relativePerspective[0] >= -32 and chunk["chunk"][item-1]["position"][0]-relativePerspective[0] <= WIDTH and chunk["chunk"][item-1]["position"][1]-relativePerspective[1] >= -32 and chunk["chunk"][item-1]["position"][1]-relativePerspective[1] <= HEIGHT:
-          Win.blit(Get_Sprite(chunk["chunk"][item-1]["item"]["hotbarSprite"],(0,0,0),64),((chunk["chunk"][item-1]["position"][0]-relativePerspective[0],chunk["chunk"][item-1]["position"][1]-relativePerspective[1])))
-          Item_Pick_Up(chunk,item)
-                
-
+        if chunk["chunk"][item]["position"][0]-relativePerspective[0] >= -32 and chunk["chunk"][item]["position"][0]-relativePerspective[0] <= WIDTH and chunk["chunk"][item]["position"][1]-relativePerspective[1] >= -32 and chunk["chunk"][item]["position"][1]-relativePerspective[1] <= HEIGHT:
+          Win.blit(Get_Sprite(chunk["chunk"][item]["item"]["baseInfo"]["hotbarSprite"],(0,0,0),64),((chunk["chunk"][item]["position"][0]-relativePerspective[0],chunk["chunk"][item]["position"][1]-relativePerspective[1])))
 
 def Draw_Screen_Items(map):
     for chunk in map:
       relX = ((relativePerspective[0])/2048)
       relY = ((relativePerspective[1])/2048)
       if (chunk["chunkPosition"][0] < relX+1 and chunk["chunkPosition"][0] > relX-1) and (chunk["chunkPosition"][1] < relY+1 and chunk["chunkPosition"][1] > relY-1):
-
-        Draw_Item_Chunk(chunk)    
-
-def Draw_Chunk_Roof(chunk):
-    global floorBlocks
-    global baseBlocks
-    global roofBlocks
-    global relativePerspective
-    for block in range(1024):
-       if chunk["chunk"][block]["blockPosition"][0]*64-relativePerspective[0] >= -64 and chunk["chunk"][block]["blockPosition"][0]*64-relativePerspective[0] <= WIDTH and chunk["chunk"][block]["blockPosition"][1]*64-relativePerspective[1] >= -64 and chunk["chunk"][block]["blockPosition"][1]*64-relativePerspective[1] <= HEIGHT:
-        if not chunk["chunk"][block]["roofBlock"]["sprite"] == None:
-          Win.blit(Get_Sprite(chunk["chunk"][block]["roofBlock"]["sprite"],(0,0,0),64),((chunk["chunk"][block]["blockPosition"][0]*64-relativePerspective[0],chunk["chunk"][block]["blockPosition"][1]*64-relativePerspective[1])))
-
-
-def Draw_Screen_Roof(map):
-    for chunk in map:
-      relX = ((relativePerspective[0])/2048)
-      relY = ((relativePerspective[1])/2048)
-      if (chunk["chunkPosition"][0] < relX+1 and chunk["chunkPosition"][0] > relX-1) and (chunk["chunkPosition"][1] < relY+1 and chunk["chunkPosition"][1] > relY-1):
-        Draw_Chunk_Roof(chunk)
-
+        Draw_Item_Chunk(chunk)   
+        Pick_up_item(chunk) 
 
 def Draw_Inv():
     Win.blit(Get_Sprite(pygame.image.load("SV2/sprites/playerStuff/inv.png").convert_alpha(),(0,0,0),552),(684,264))
     for item in range(16):
-        if not player["inventory"][item]["type"] == None: 
-          Win.blit(Get_Sprite(player["inventory"][item]["invSprite"],(0,0,0),128),[(item%4*138)+689,(item//4*138)+269])
+        if not player["inventory"][item]["baseInfo"]["type"] == None: 
+          Win.blit(Get_Sprite(player["inventory"][item]["baseInfo"]["invSprite"],(0,0,0),128),[(item%4*138)+689,(item//4*138)+269])
+          if player["inventory"][item]["baseInfo"]["stacks"]:
+            num = player["inventory"][item]["stack"][0]
+            Win.blit(Get_Sprite(pygame.image.load(f"SV2/sprites/nums/{num}.png").convert_alpha(),(0,0,0),8),[(item%4*138)+689,(item//4*138)+269])
 
 def Draw_Hotbar():
     Win.blit(Get_Sprite( pygame.image.load("SV2/sprites/playerStuff/hotbar.png").convert_alpha(),(0,0,0),1068),(426,21))
-    if not player["inventory"][0]["hotbarSprite"] == None:
-       Win.blit(Get_Sprite(player["inventory"][0]["hotbarSprite"],(0,0,0),32),(432,26))
-    if not player["inventory"][1]["hotbarSprite"] == None:
-       Win.blit(Get_Sprite(player["inventory"][1]["hotbarSprite"],(0,0,0),32),(582,26))
-    if not player["inventory"][2]["hotbarSprite"] == None:
-       Win.blit(Get_Sprite(player["inventory"][2]["hotbarSprite"],(0,0,0),32),(1305,26))
-    if not player["inventory"][3]["hotbarSprite"] == None:
-       Win.blit(Get_Sprite(player["inventory"][3]["hotbarSprite"],(0,0,0),32),(1456,26))
+    if not player["inventory"][0]["baseInfo"]["hotbarSprite"] == None:
+       Win.blit(Get_Sprite(player["inventory"][0]["baseInfo"]["hotbarSprite"],(0,0,0),32),(432,26))
+    if not player["inventory"][1]["baseInfo"]["hotbarSprite"] == None:
+       Win.blit(Get_Sprite(player["inventory"][1]["baseInfo"]["hotbarSprite"],(0,0,0),32),(582,26))
+    if not player["inventory"][2]["baseInfo"]["hotbarSprite"] == None:
+       Win.blit(Get_Sprite(player["inventory"][2]["baseInfo"]["hotbarSprite"],(0,0,0),32),(1305,26))
+    if not player["inventory"][3]["baseInfo"]["hotbarSprite"] == None:
+       Win.blit(Get_Sprite(player["inventory"][3]["baseInfo"]["hotbarSprite"],(0,0,0),32),(1456,26))
 
 def Draw_Stats():
     Win.blit(Get_Sprite( pygame.image.load("SV2/sprites/playerStuff/manaStatBar.png").convert_alpha(),(0,0,0),170),(683,21))
@@ -702,34 +857,34 @@ def Draw_Stats():
 
 def Draw_Hands():
     Win.blit(Get_Sprite( pygame.image.load("SV2/sprites/playerStuff/handSlot.png").convert_alpha(),(0,0,0),42),(502,43))
-    if not player["leftHand"]["type"] == None:
-       Win.blit(Get_Sprite(player["leftHand"]["hotbarSprite"],(0,0,0),32),(507,48))
+    if not player["leftHand"]["baseInfo"]["type"] == None:
+       Win.blit(Get_Sprite(player["leftHand"]["baseInfo"]["hotbarSprite"],(0,0,0),32),(507,48))
     Win.blit(Get_Sprite( pygame.image.load("SV2/sprites/playerStuff/handSlot.png").convert_alpha(),(0,0,0),42),(1378,43))
-    if not player["rightHand"]["type"] == None:
-       Win.blit(Get_Sprite(player["rightHand"]["hotbarSprite"],(0,0,0),32),(1383,48))
+    if not player["rightHand"]["baseInfo"]["type"] == None:
+       Win.blit(Get_Sprite(player["rightHand"]["baseInfo"]["hotbarSprite"],(0,0,0),32),(1383,48))
     
 def Draw_Equipment():
     Win.blit(Get_Sprite(pygame.image.load("SV2/sprites/playerStuff/invItem.png").convert_alpha(),(0,0,0),138),[753,100]) #LH
-    if not player["leftHand"]["type"] == None: 
-      Win.blit(Get_Sprite(player["leftHand"]["invSprite"],(0,0,0),128),[758,105])
+    if not player["leftHand"]["baseInfo"]["type"] == None: 
+      Win.blit(Get_Sprite(player["leftHand"]["baseInfo"]["invSprite"],(0,0,0),128),[758,105])
     Win.blit(Get_Sprite(pygame.image.load("SV2/sprites/playerStuff/invItem.png").convert_alpha(),(0,0,0),138),[1029,100]) #RH
-    if not player["rightHand"]["type"] == None:
-      Win.blit(Get_Sprite(player["rightHand"]["invSprite"],(0,0,0),128),[1034,105])
+    if not player["rightHand"]["baseInfo"]["type"] == None:
+      Win.blit(Get_Sprite(player["rightHand"]["baseInfo"]["invSprite"],(0,0,0),128),[1034,105])
     Win.blit(Get_Sprite( pygame.image.load("SV2/sprites/playerStuff/helm.png").convert_alpha(),(0,0,0),138),(509,850)) #HELM
-    if not player["helm"]["type"] == None:
-      Win.blit(Get_Sprite(player["helm"]["invSprite"],(0,0,0),128),[514,855])
+    if not player["helm"]["baseInfo"]["type"] == None:
+      Win.blit(Get_Sprite(player["helm"]["baseInfo"]["invSprite"],(0,0,0),128),[514,855])
     Win.blit(Get_Sprite( pygame.image.load("SV2/sprites/playerStuff/chest.png").convert_alpha(),(0,0,0),138),(700,850)) #Chest
-    if not player["chest"]["type"] == None:
-      Win.blit(Get_Sprite(player["chest"]["invSprite"],(0,0,0),128),[705,855])
+    if not player["chest"]["baseInfo"]["type"] == None:
+      Win.blit(Get_Sprite(player["chest"]["baseInfo"]["invSprite"],(0,0,0),128),[705,855])
     Win.blit(Get_Sprite( pygame.image.load("SV2/sprites/playerStuff/legs.png").convert_alpha(),(0,0,0),138),(891,850)) #Legs
-    if not player["legs"]["type"] == None:
-      Win.blit(Get_Sprite(player["legs"]["invSprite"],(0,0,0),128),[896,855])
+    if not player["legs"]["baseInfo"]["type"] == None:
+      Win.blit(Get_Sprite(player["legs"]["baseInfo"]["invSprite"],(0,0,0),128),[896,855])
     Win.blit(Get_Sprite( pygame.image.load("SV2/sprites/playerStuff/boots.png").convert_alpha(),(0,0,0),138),(1082,850)) #BOOTS
-    if not player["boots"]["type"] == None:
-      Win.blit(Get_Sprite(player["boots"]["invSprite"],(0,0,0),128),[1087,855])
+    if not player["boots"]["baseInfo"]["type"] == None:
+      Win.blit(Get_Sprite(player["boots"]["baseInfo"]["invSprite"],(0,0,0),128),[1087,855])
     Win.blit(Get_Sprite( pygame.image.load("SV2/sprites/playerStuff/gloves.png").convert_alpha(),(0,0,0),138),(1273,850)) #GLOVES
-    if not player["gloves"]["type"] == None:
-      Win.blit(Get_Sprite(player["gloves"]["invSprite"],(0,0,0),128),[1278,855])
+    if not player["gloves"]["baseInfo"]["type"] == None:
+      Win.blit(Get_Sprite(player["gloves"]["baseInfo"]["invSprite"],(0,0,0),128),[1278,855])
 
 def Draw_Overlay():
     Draw_Hotbar()
@@ -738,10 +893,9 @@ def Draw_Overlay():
 def Draw_Tab():
     Draw_Inv()
     Draw_Equipment()
-    if not heldInvObject["item"]["type"] == None:
+    if not heldInvObject["item"]["baseInfo"]["type"] == None:
         xy = pygame.mouse.get_pos()
-        Win.blit(Get_Sprite(heldInvObject["item"]["invSprite"],(0,0,0),128),(xy[0]-64,xy[1]-64))
-
+        Win.blit(Get_Sprite(heldInvObject["item"]["baseInfo"]["invSprite"],(0,0,0),128),(xy[0]-64,xy[1]-64))
 
 def Change_Player_Stats():
     if player["stam"][0] < player["stam"][1]:
@@ -751,15 +905,15 @@ def Change_Player_Stats():
     if player["mana"][0] < player["mana"][1]:
        player["mana"][0] += .5
 
-
 def Editor_Mode():
     map = Make_Chunks(mapChunkSize[0],mapChunkSize[1])
     itemMap = Make_Item_Chunks(mapChunkSize[0],mapChunkSize[1])
     projectileMap = Make_Projectile_Chunks(mapChunkSize[0],mapChunkSize[1])
+    
     while running:
       Win.fill((0,0,0))
       Draw_Screen(map)
-      #Draw_Screen_Roof(map)
+      Draw_Screen_Items(itemMap)
       Get_Keyboard_Events_Editor_Mode()
       pygame.display.update()
 
@@ -770,17 +924,14 @@ def Single_Player_Mode():
     tick = 0
     sec = 0
     beginSec = time()
+
     while running:
       Win.fill((0,0,0))
-
       Draw_Screen(map)
       Draw_Screen_Items(itemMap)
       Win.blit(Get_Sprite(player["sprite"],(0,0,0),64),(928,508))
-      #Draw_Screen_Roof(map)
-
-      Get_Keyboard_Events_Single_Player_Mode(map,itemMap,sec)
+      Get_Keyboard_Events_Single_Player_Mode(map,itemMap,sec,tick)
       Destroy_Item(sec,itemMap)
-
       Change_Player_Stats()
       Draw_Stats()
       if invOn:
