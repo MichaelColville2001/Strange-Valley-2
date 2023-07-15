@@ -23,6 +23,9 @@ mouseState = ""
 leftRightMouseButton = [False,False,False]
 
 mapChunkSize = [25,25] #max 100x100
+
+viewCord = [[1,0],[1,-1],[0,-1],[-1,-1],[-1,0],[-1,1],[0,1],[1,1]]
+
 invOn = False
 
 shift = False
@@ -42,26 +45,33 @@ projectiles = {}
 
 ######################################################################################################################################################################################
 
-items = {"none":{"baseInfo":{"name":None,"type":None,"stacks":False,"invSprite":None,"hotbarSprite":None},"speed":15},
+items = {"none":{"baseInfo":{"name":None,"type":None,"stacks":False,"invSprite":None,"itemSprite":None},"speed":15},
          
-        "Camp_Fire":{"baseInfo":{"name":"Camp_Fire","type":"hand","stacks":False,"invSprite":LO("invView/campFireIV"),"hotbarSprite":LO("hotbarView/campFireHBV")},"first":"block","second":"active","tier":0,"speed":0,"coolDown":0},    
-        "Pry_Stick":{"baseInfo":{"name":"Pry_Stick","type":"hand","stacks":False,"invSprite":LO("invView/pryStickIV"),"hotbarSprite":LO("hotbarView/pryStickHBV")},"first":"tool","second":"pick","tier":0,"damage":10,"durability":[100,100],"speed":20},
-        "Stone_Axe":{"baseInfo":{"name":"Stone_Axe","type":"hand","stacks":False,"invSprite":LO("invView/stoneAxeIV"),"hotbarSprite":LO("hotbarView/stoneAxeHBV")},"first":"tool","second":"axe","tier":0,"damage":10,"durability":[100,100],"speed":20},
-        "Stone_Knife":{"baseInfo":{"name":"Stone_Knife","type":"hand","stacks":False,"invSprite":LO("invView/stoneKnifeIV"),"hotbarSprite":LO("hotbarView/stoneKnifeHBV")},"first":"tool","second":"knife","tier":0,"durability":[1,1],"damage":10,"speed":0,"coolDown":1},
+        "Camp_Fire":{"baseInfo":{"name":"Camp_Fire","type":"hand","stacks":False,"invSprite":LO("invView/campFire"),"itemSprite":LO("itemSprite/campFire")},"first":"block","second":"active","tier":1,"speed":0,"coolDown":0}, 
 
-        "Stone":{"baseInfo":{"name":"Stone","type":"inv","stacks":True,"invSprite":LO("invView/rockIV"),"hotbarSprite":LO("hotbarView/rockHBV")},"stack":[1,8]},
-        "Wood":{"baseInfo":{"name":"Wood","type":"inv","stacks":True,"invSprite":LO("invView/woodIV"),"hotbarSprite":LO("hotbarView/woodHBV")},"stack":[1,8]},
-        "Clay":{"baseInfo":{"name":"Clay","type":"inv","stacks":True,"invSprite":LO("invView/clayIV"),"hotbarSprite":LO("hotbarView/clayHBV")},"stack":[1,8]},
-        "Wood_Axe_Handle":{"baseInfo":{"name":"Wood_Axe_Handle","type":"inv","stacks":True,"invSprite":LO("invView/woodAxeHandleIV"),"hotbarSprite":LO("hotbarView/woodAxeHandleHBV")},"stack":[1,8]},
+        "Fired_Clay_Pot":{"baseInfo":{"name":"Fired_Clay_Pot","type":"hand","stacks":False,"invSprite":LO("invView/firedClayPot"),"itemSprite":LO("itemSprite/firedClayPot")},"first":"block","second":"inActive","tier":1,"speed":0,"coolDown":0},   
+        "Wood_Chest":{"baseInfo":{"name":"Wood_Chest","type":"hand","stacks":False,"invSprite":LO("invView/woodChest"),"itemSprite":LO("itemSprite/woodChest")},"first":"block","second":"inActive","tier":2,"speed":0,"coolDown":0},   
+        "Reinforced_Wood_Chest":{"baseInfo":{"name":"Reinforced_Wood_Chest","type":"hand","stacks":False,"invSprite":LO("invView/reinforcedWoodChest"),"itemSprite":LO("itemSprite/reinforcedWoodChest")},"first":"block","second":"inActive","tier":3,"speed":0,"coolDown":0},   
+        "Iron_Safe":{"baseInfo":{"name":"Iron_Safe","type":"hand","stacks":False,"invSprite":LO("invView/ironSafe"),"itemSprite":LO("itemSprite/ironSafe")},"first":"block","second":"inActive","tier":4,"speed":0,"coolDown":0},   
+        "Steel_Safe":{"baseInfo":{"name":"Steel_Safe","type":"hand","stacks":False,"invSprite":LO("invView/steelSafe"),"itemSprite":LO("itemSprite/steelSafe")},"first":"block","second":"inActive","tier":5,"speed":0,"coolDown":0},   
 
-        "Helm":{"baseInfo":{"name":"Helm","type":"helm","stacks":False,"invSprite":LO("invView/helmIV"),"hotbarSprite":LO("hotbarView/helmHBV")}}
+        "Pry_Stick":{"baseInfo":{"name":"Pry_Stick","type":"hand","stacks":False,"invSprite":LO("invView/pryStick"),"itemSprite":LO("itemSprite/pryStick")},"first":"tool","second":"pick","tier":1,"damage":10,"durability":[100,100],"speed":20},
+        "Stone_Axe":{"baseInfo":{"name":"Stone_Axe","type":"hand","stacks":False,"invSprite":LO("invView/stoneAxe"),"itemSprite":LO("itemSprite/stoneAxe")},"first":"tool","second":"axe","tier":1,"damage":10,"durability":[100,100],"speed":20},
+        "Stone_Knife":{"baseInfo":{"name":"Stone_Knife","type":"hand","stacks":False,"invSprite":LO("invView/stoneKnife"),"itemSprite":LO("itemSprite/stoneKnife")},"first":"tool","second":"knife","tier":1,"durability":[1,1],"damage":10,"speed":0,"coolDown":1},
+
+        "Stone":{"baseInfo":{"name":"Stone","type":"inv","stacks":True,"invSprite":LO("invView/rock"),"itemSprite":LO("itemSprite/rock")},"stack":[5,8]},
+        "Wood":{"baseInfo":{"name":"Wood","type":"inv","stacks":True,"invSprite":LO("invView/wood"),"itemSprite":LO("itemSprite/wood")},"stack":[1,8]},
+        "Clay":{"baseInfo":{"name":"Clay","type":"inv","stacks":True,"invSprite":LO("invView/clay"),"itemSprite":LO("itemSprite/clay")},"stack":[1,8]},
+        "Wood_Axe_Handle":{"baseInfo":{"name":"Wood_Axe_Handle","type":"inv","stacks":True,"invSprite":LO("invView/woodAxeHandle"),"itemSprite":LO("itemSprite/woodAxeHandle")},"stack":[1,8]},
+
+        "Helm":{"baseInfo":{"name":"Helm","type":"helm","stacks":False,"invSprite":LO("invView/helm"),"itemSprite":LO("itemSprite/helm")}}
         }
 
 ######################################################################################################################################################################################
 
 assembely ={"Stone_Knife":{"ingredients":[["Stone",2]]},
             "Stone_Axe":{"ingredients":[["Wood_Axe_Handle",1],["Stone_Knife",1]]},
-            "Camp_Fire":{"ingredients":[["Stone",10],["Wood",2]]}}
+            "Camp_Fire":{"ingredients":[["Stone",8],["Wood",2]]}}
 
 carving = {"Pry_Stick":{"tier":0,"work":1,"ingredients":[["Wood",1]]},
            "Wood_Axe_Handle":{"tier":0,"work":1,"ingredients":[["Wood",1]]}}
@@ -150,7 +160,7 @@ def Carve(craftingItem):
 def Convert_Item(item):
   type = item["baseInfo"]["type"]
   if type == None:
-    return {"baseInfo":{"name":None,"type":None,"stacks":False,"invSprite":None,"hotbarSprite":None}}
+    return {"baseInfo":{"name":None,"type":None,"stacks":False,"invSprite":None,"itemSprite":None}}
   elif type == "inv":
     if item["baseInfo"]["stacks"]:
       return {"baseInfo":item["baseInfo"],"stack":item["stack"].copy()}
@@ -165,22 +175,40 @@ def Convert_Item(item):
     elif item["first"] == "block":
       if item["second"] == "active":
         return {"baseInfo":item["baseInfo"],"first":item["first"],"second":item["second"],"tier":item["tier"],"speed":item["speed"],"coolDown":item["coolDown"]}
+      if item["second"] == "inActive":
+        return {"baseInfo":item["baseInfo"],"first":item["first"],"second":item["second"],"tier":item["tier"],"speed":item["speed"],"coolDown":item["coolDown"]}
   elif type == "helm":
     return {"baseInfo":item["baseInfo"]}
   
 
 def Convert_Blocks(item):
-  if item["type"] == None:
-    return item
+  mP = pygame.mouse.get_pos()
   if item["blockType"] == "floor":
-    return {"blockType":item["blockType"],"type":item["type"],"sprites":item["sprites"][randint(0,len(item["sprites"])-1)]} 
+    return {"name":item["name"],"blockType":item["blockType"],"type":item["type"],"sprites":item["sprites"][randint(0,len(item["sprites"])-1)]} 
+  
   if item["blockType"] == "base":
-    if item["type"] == "rock":
-      return {"blockType":item["blockType"],"type":item["type"],"sprites":item["sprites"][randint(0,len(item["sprites"])-1)],"tier":item["tier"],"hp":[item["hp"][0],item["hp"][0]],"resistance":item["resistance"],"dropTable":item["dropTable"]} 
-    if item["type"] == "wood":
-      return {"blockType":item["blockType"],"type":item["type"],"sprites":item["sprites"][randint(0,len(item["sprites"])-1)],"tier":item["tier"],"hp":[item["hp"][0],item["hp"][0]],"resistance":item["resistance"],"dropTable":item["dropTable"]} 
+    if item["type"] == None:
+      return{"name":None,"blockType":"base","type":None,"sprites":None}
+    else:
+      return {"name":item["name"],"blockType":item["blockType"],"type":item["type"],"sprites":item["sprites"][randint(0,len(item["sprites"])-1)],"tier":item["tier"],"hp":[item["hp"][0],item["hp"][0]],"resistance":item["resistance"],"dropTable":item["dropTable"]} 
+    
+  if item["blockType"] == "plant":
+    return {"name":item["name"],"blockType":item["blockType"],"type":item["type"],"sprites":item["sprites"][randint(0,len(item["sprites"])-1)],"tier":item["tier"],"hp":[item["hp"][0],item["hp"][0]],"resistance":item["resistance"],"dropTable":item["dropTable"]} 
+
+  if item["blockType"] == "pile":
+    return {"name":item["name"],"blockType":item["blockType"],"type":item["type"],"sprites":item["sprites"][randint(0,len(item["sprites"])-1)],"tier":item["tier"],"hp":[item["hp"][0],item["hp"][0]],"resistance":item["resistance"],"dropTable":item["dropTable"]} 
+
+  if item["blockType"] == "inActive":
+    if item["type"] == "storage":
+      if item["name"] == "Fired_Clay_Pot":
+        return {"name":item["name"],"blockType":item["blockType"],"type":item["type"],"sprites":item["sprites"],"tier":item["tier"],"hp":[item["hp"][0],item["hp"][0]],"resistance":item["resistance"],"inv":[item["inv"][0],item["inv"][1],item["inv"][2],item["inv"][3]]} 
+      if item["name"] == "Wood_Chest" or item["name"] == "Reinforced_Wood_Chest":
+        return {"name":item["name"],"blockType":item["blockType"],"type":item["type"],"sprites":item["sprites"][int((Get_Line_Angle([0,0],[mP[0]-960,mP[1]-540])-315)//90)],"tier":item["tier"],"hp":[item["hp"][0],item["hp"][0]],"resistance":item["resistance"],"inv":[item["inv"][0],item["inv"][1],item["inv"][2],item["inv"][3],item["inv"][4],item["inv"][5],item["inv"][6],item["inv"][7],item["inv"][8]]} 
+      if item["name"] == "Iron_Safe" or item["name"] == "Steel_Safe":
+        return {"name":item["name"],"blockType":item["blockType"],"type":item["type"],"sprites":item["sprites"][int((Get_Line_Angle([0,0],[mP[0]-960,mP[1]-540])-315)//90)],"tier":item["tier"],"hp":[item["hp"][0],item["hp"][0]],"resistance":item["resistance"],"inv":[item["inv"][0],item["inv"][1],item["inv"][2],item["inv"][3],item["inv"][4],item["inv"][5],item["inv"][6],item["inv"][7],item["inv"][8],item["inv"][9],item["inv"][10],item["inv"][11],item["inv"][12],item["inv"][13],item["inv"][14],item["inv"][15]]} 
+
   if item["blockType"] == "active":
-    return {"blockType":item["blockType"],"type":item["type"],"blockPosition":[item["blockPostion"][0],item["blockPostion"][1]],"active":item["active"],"onSprite":item["onSprite"],"offSprite":item["offSprite"],"cookingInv":item["cookingInv"],"outPutInv":item["outPutInv"],"fuelInv":item["fuelInv"],"dropTable":item["dropTable"],"timeLeft":item["timeLeft"],"tier":item["tier"],"hp":[item["hp"][0],item["hp"][0]],"resistance":item["resistance"]}
+    return {"name":item["name"],"blockType":item["blockType"],"type":item["type"],"blockPosition":[item["blockPostion"][0],item["blockPostion"][1]],"active":item["active"],"onSprite":item["onSprite"],"offSprite":item["offSprite"],"cookingInv":item["cookingInv"],"outPutInv":item["outPutInv"],"fuelInv":item["fuelInv"],"dropTable":item["dropTable"],"timeLeft":item["timeLeft"],"tier":item["tier"],"hp":[item["hp"][0],item["hp"][0]],"resistance":item["resistance"]}
 
 ########################################################################################################################################################################################
 
@@ -206,24 +234,46 @@ creatures = {}
 
 #######################################################################################################################################################################################
 
-floorBlocks = {"Grass": {"blockType":"floor","type":"grass","sprites":[LO("floorBlocks/grass1"),LO("floorBlocks/grass2"),LO("floorBlocks/grass3"),LO("floorBlocks/grass4")]},
-               "Water": {"blockType":"floor","type":"water","sprites":[LO("floorBlocks/water")]},
-               "Dirt": {"blockType":"floor","type":"dirt","sprites":[LO("floorBlocks/dirt")]}}
+floorBlocks = {"Grass": {"name":"Grass","blockType":"floor","type":"grass","sprites":[LO("floorBlocks/grass1"),LO("floorBlocks/grass2"),LO("floorBlocks/grass3"),LO("floorBlocks/grass4")]},
+               "Water": {"name":"Water","blockType":"floor","type":"water","sprites":[LO("floorBlocks/water")]},
+               "Dirt": {"name":"Dirt","blockType":"floor","type":"dirt","sprites":[LO("floorBlocks/dirt")]}}
 
+# # # # #
 
-baseBlocks = {"none":{"blockType":"base","type":None,"sprites":None},
-              "Rock":{"blockType":"base","type":"rock","sprites":[LO("baseBlocks/rock")],"tier":1,"hp":[100,100],"resistance":0.95,"dropTable":[Drop_Table(items["Stone"],1),5]},
-              "Log":{"blockType":"base","type":"wood","sprites":[LO("baseBlocks/wood")],"tier":0,"hp":[100,100],"resistance":0.95,"dropTable":[Drop_Table(items["Wood"],1),5]},
-              "Rock Pile":{"blockType":"base","type":"rock","sprites":[LO("baseBlocks/rockPile")],"tier":0,"hp":[100,100],"resistance":1,"dropTable":[Drop_Table(items["Stone"],10,items["Clay"],1),2]},
-              "Clay Brick Wall":{"blockType":"inActive","type":"wall","sprite":None,"tier":0,"hp":[100,100],"resistance":0.95}}
+baseBlocks = {"none":{"name":None,"blockType":"base","type":None,"sprites":None},
+              
+              "Rock":{"name":"Rock","blockType":"base","type":"rock","sprites":[LO("baseBlocks/rock")],"tier":2,"hp":[100,100],"resistance":0.95,"dropTable":[Drop_Table(items["Stone"],1),5]},
+              "Log":{"name":"Log","blockType":"base","type":"wood","sprites":[LO("baseBlocks/wood")],"tier":1,"hp":[100,100],"resistance":0.95,"dropTable":[Drop_Table(items["Wood"],1),5]},
 
+              "Rock_Pile":{"name":"Rock_Pile","blockType":"pile","type":"rock","sprites":[LO("baseBlocks/rockPile1"),LO("baseBlocks/rockPile2"),LO("baseBlocks/rockPile3"),LO("baseBlocks/rockPile4")],"tier":0,"hp":[100,100],"resistance":1,"dropTable":[Drop_Table(items["Stone"],2,items["none"],1),5]},
+
+              "Bush":{"name":"Bush","blockType":"plant","type":"wood","sprites":[LO("baseBlocks/bush")],"tier":0,"hp":[100,100],"resistance":1,"dropTable":[Drop_Table(items["Wood"],2,items["none"],1),5]},
+              
+              # # # # #
+
+              "Clay_Brick_Wall":{"name":"Clay_Brick_Wall","blockType":"inActive","type":"wall","sprite":None,"tier":1,"hp":[100,100],"resistance":0.95},
+              "Adobe_Wall":{"name":"Adobe_Wall","blockType":"inActive","type":"wall","sprite":None,"tier":1,"hp":[100,100],"resistance":0.95},
+              "Wood_Wall":{"name":"Wood_Wall","blockType":"inActive","type":"wall","sprite":None,"tier":2,"hp":[100,100],"resistance":0.95},
+              "Reinforced_Wood_Wall":{"name":"Reinforced_Wood_Wall","blockType":"inActive","type":"wall","sprite":None,"tier":3,"hp":[100,100],"resistance":0.95},
+              "Stone_Wall":{"name":"Stone_Wall","blockType":"inActive","type":"wall","sprite":None,"tier":4,"hp":[100,100],"resistance":0.95},
+              "Reinforced_Concrete_Wall":{"name":"Reinforced_Concrete_Wall","blockType":"inActive","type":"wall","sprite":None,"tier":5,"hp":[100,100],"resistance":0.95},
+
+              # # # # #
+
+              "Fired_Clay_Pot":{"name":"Fired_Clay_Pot","blockType":"inActive","type":"storage","sprites":LO("inActiveBlocks/firedClayPot"),"tier":1,"hp":[100,100],"resistance":0.95,"inv":[Convert_Item(items["Stone"]),items["none"],items["none"],items["none"]]},
+              "Wood_Chest":{"name":"Wood_Chest","blockType":"inActive","type":"storage","sprites":[LO("inActiveBlocks/woodChest3"),LO("inActiveBlocks/woodChest4"),LO("inActiveBlocks/woodChest1"),LO("inActiveBlocks/woodChest2")],"tier":2,"hp":[100,100],"resistance":0.95,"inv":[items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],Convert_Item(items["Pry_Stick"]),items["none"],items["none"]]},
+              "Reinforced_Wood_Chest":{"name":"Reinforced_Wood_Chest","blockType":"inActive","type":"storage","sprites":[LO("inActiveBlocks/reinforcedWoodChest3"),LO("inActiveBlocks/reinforcedWoodChest4"),LO("inActiveBlocks/reinforcedWoodChest1"),LO("inActiveBlocks/reinforcedWoodChest2")],"tier":3,"hp":[100,100],"resistance":0.95,"inv":[items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"]]},
+              "Iron_Safe":{"name":"Iron_Safe","blockType":"inActive","type":"storage","sprites":[LO("inActiveBlocks/ironSafe3"),LO("inActiveBlocks/ironSafe4"),LO("inActiveBlocks/ironSafe1"),LO("inActiveBlocks/ironSafe2")],"tier":4,"hp":[100,100],"resistance":0.95,"inv":[items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"]]},
+              "Steel_Safe":{"name":"Steel_Safe","blockType":"inActive","type":"storage","sprites":[LO("inActiveBlocks/steelSafe3"),LO("inActiveBlocks/steelSafe4"),LO("inActiveBlocks/steelSafe1"),LO("inActiveBlocks/steelSafe2")],"tier":5,"hp":[100,100],"resistance":0.95,"inv":[items["none"],items["none"],items["none"],items["none"],items["none"],Convert_Item(items["Pry_Stick"]),items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"]]}}
+
+# # # # #
 
 activeBlocks = {"none":{"type":None,"sprite":None},
-                "Camp_Fire":{"blockType":"active","type":"foodCooker","blockPostion":[None,None],"active":False,"onSprite":LO("activeBlocks/onCampFire"),"offSprite":LO("activeBlocks/offCampFire"),"cookingInv":[items["none"],items["none"],items["none"]],"outPutInv":[items["none"],items["none"],items["none"]],"fuelInv":[items["none"],items["none"]],"dropTable":[Drop_Table(items["Camp_Fire"],1),1],"timeLeft":0,"tier":0,"hp":[100,100],"resistance":0.95}}
+                "Camp_Fire":{"name":"Camp_Fire","blockType":"active","type":"foodCooker","blockPostion":[None,None],"active":False,"onSprite":LO("activeBlocks/onCampFire"),"offSprite":LO("activeBlocks/offCampFire"),"cookingInv":[items["none"],items["none"],items["none"]],"outPutInv":[items["none"],items["none"],items["none"]],"fuelInv":[items["none"],items["none"]],"dropTable":[Drop_Table(items["Camp_Fire"],1),1],"timeLeft":0,"tier":0,"hp":[100,100],"resistance":0.95}}
 
 #######################################################################################################################################################################################
 
-player = {"position": [200,200],
+player = {"position": [10,10],
           "sprites":[LO("player/player1"),
                      LO("player/player2"),
                      LO("player/player3"),
@@ -235,6 +285,7 @@ player = {"position": [200,200],
           "hp":[1,100],
           "mana":[1,100],
           "stam":[1,100],
+          "objectOpen":[None,None],
           "heldInvObject":{"item":items["none"],"index":None},
           "craftingTool":items["none"],
           "craftingOutput":items["none"],
@@ -245,7 +296,7 @@ player = {"position": [200,200],
           "legs":items["none"],
           "boots":items["none"],
           "gloves":items["none"],
-          "inventory":[items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"]]}
+          "inventory":[Convert_Item(items["Fired_Clay_Pot"]),Convert_Item(items["Wood_Chest"]),Convert_Item(items["Steel_Safe"]),items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"],items["none"]]}
 
 ########################################################################################################################################################################################
 
@@ -366,7 +417,6 @@ def Make_Chunks(ChunkSizeX,ChunkSizeY):
         chunk = []
         for yBlock in range(32):
           for xBlock in range(32):
-            chunksToDraw = Get_Chunks_To_Draw(ChunkSizeX,ChunkSizeY,x,y,xBlock,yBlock)
             floor = Convert_Blocks(floorBlocks["Grass"])
             base = Convert_Blocks(baseBlocks["none"])
             if randint(0,25) == 1:
@@ -374,7 +424,12 @@ def Make_Chunks(ChunkSizeX,ChunkSizeY):
             elif randint(0,100) == 1:
               base = Convert_Blocks(baseBlocks["Log"])
             elif randint(0,50) == 1:
-              base = Convert_Blocks(baseBlocks["Rock Pile"])
+              base = Convert_Blocks(baseBlocks["Rock_Pile"])
+            elif randint(0,100) == 1:
+              base = Convert_Blocks(baseBlocks["Bush"])
+            elif randint(0,1000) == 1:
+              player["position"][0] = x
+              player["position"][1] = y
             chunk.append({"position":[xBlock+(x*32),yBlock+(y*32)],"floorBlock":floor,"baseBlock":base})
         map.append({"chunkPosition":[x,y],"chunk":chunk})
     return map
@@ -413,29 +468,99 @@ def Hotbar_Quick_Change(num,hand):
 
 ####################################################################################################################################################################################
    
-def Get_Assemble_Items(mp):
-    if Get_Inv_Item(1305,1443,269,407,mp):
+def Get_Assemble_Items(mP):
+    if Get_Inv_Item(1305,1443,269,407,mP):
       Assemble("Stone_Knife")
-    if Get_Inv_Item(1444,1582,269,407,mp):
+    if Get_Inv_Item(1444,1582,269,407,mP):
       Assemble("Stone_Axe")
-    if Get_Inv_Item(1583,1721,269,407,mp):
+    if Get_Inv_Item(1583,1721,269,407,mP):
       Assemble("Camp_Fire")
 
-def Get_Carve_Items(mp):
-    if Get_Inv_Item(1305,1443,269,407,mp):
+def Get_Carve_Items(mP):
+    if Get_Inv_Item(1305,1443,269,407,mP):
       Carve("Pry_Stick")
-    if Get_Inv_Item(1444,1582,269,407,mp):
+    if Get_Inv_Item(1444,1582,269,407,mP):
       Carve("Wood_Axe_Handle")
 
-def Get_All_Inv_Items(mP):
+def Get_4_Storage(mP):
     num = None
-    if Get_Inv_Item(684,822,264,392,mP):
+    if Get_Inv_Item(206,344,402,540,mP):
+      num = 25
+    elif Get_Inv_Item(344,482,402,540,mP):
+      num = 26
+    elif Get_Inv_Item(206,344,540,678,mP):
+      num = 27
+    elif Get_Inv_Item(344,482,540,678,mP):
+      num = 28
+    return num
+
+def Get_9_Storage(mP):
+    num = None
+    if Get_Inv_Item(137,275,333,471,mP):
+      num = 25
+    elif Get_Inv_Item(275,413,333,471,mP):
+      num = 26
+    elif Get_Inv_Item(413,551,333,471,mP):
+      num = 27 
+    elif Get_Inv_Item(137,275,471,609,mP):
+      num = 28
+    elif Get_Inv_Item(275,413,471,609,mP):
+      num = 29 
+    elif Get_Inv_Item(413,551,471,609,mP):
+      num = 30
+    elif Get_Inv_Item(137,275,609,747,mP):
+      num = 31
+    elif Get_Inv_Item(275,413,609,747,mP):
+      num = 32
+    elif Get_Inv_Item(413,551,609,747,mP):
+      num = 33
+    return num
+
+def Get_16_Storage(mP):
+    num = None
+    if Get_Inv_Item(68,206,264,392,mP):
+      num = 25
+    elif Get_Inv_Item(206,344,264,392,mP):
+      num = 26
+    elif Get_Inv_Item(344,482,264,392,mP):
+      num = 27 
+    elif Get_Inv_Item(482,620,264,392,mP):
+      num = 28
+    elif Get_Inv_Item(68,206,402,540,mP):
+      num = 29 
+    elif Get_Inv_Item(206,344,402,540,mP):
+      num = 30
+    elif Get_Inv_Item(344,482,402,540,mP):
+      num = 31
+    elif Get_Inv_Item(482,620,402,540,mP):
+      num = 32
+    elif Get_Inv_Item(68,206,540,678,mP):
+      num = 33
+    elif Get_Inv_Item(206,344,540,678,mP):
+      num = 34
+    elif Get_Inv_Item(344,482,540,678,mP):
+      num = 35
+    elif Get_Inv_Item(482,620,540,678,mP):
+      num = 36
+    elif Get_Inv_Item(68,206,678,816,mP):
+      num = 37
+    elif Get_Inv_Item(206,344,678,816,mP):
+      num = 38
+    elif Get_Inv_Item(344,482,678,816,mP):
+      num = 39
+    elif Get_Inv_Item(482,620,678,816,mP):
+      num = 40
+    return num
+
+def Get_All_Inv_Items(mP,map):
+    num = None
+    if Get_Inv_Item(684,822,264,402,mP):
       num = 0 
-    elif Get_Inv_Item(822,960,264,392,mP):
+    elif Get_Inv_Item(822,960,264,402,mP):
       num = 1
-    elif Get_Inv_Item(960,1098,264,392,mP):
+    elif Get_Inv_Item(960,1098,264,402,mP):
       num = 2 
-    elif Get_Inv_Item(1098,1236,264,392,mP):
+    elif Get_Inv_Item(1098,1236,264,402,mP):
       num = 3 
     elif Get_Inv_Item(684,822,402,540,mP):
       num = 4 
@@ -479,9 +604,23 @@ def Get_All_Inv_Items(mP):
       num = 23
     elif Get_Inv_Item(1507,1645,850,988,mP):
       num = 24
-    if isinstance(num,int): 
+    if not player["objectOpen"][0] == None:
+      object = map[Get_Chunk(player["objectOpen"][0],player["objectOpen"][1],mapChunkSize[0],32)]["chunk"][Get_Square(player["objectOpen"][0],player["objectOpen"][1],32)]["baseBlock"]
+      if object["name"] == "Fired_Clay_Pot" and isinstance(Get_4_Storage(mP),int):
+        num = Get_4_Storage(mP)
+        return num
+      elif (object["name"] == "Wood_Chest" or object["name"] == "Reinforced_Wood_Chest") and isinstance(Get_9_Storage(mP),int):
+        num = Get_9_Storage(mP)
+        return num
+      elif (object["name"] == "Iron_Safe" or object["name"] == "Steel_Safe") and isinstance(Get_16_Storage(mP),int):
+        num = Get_16_Storage(mP)
+        return num
+      else:
+        return num
+    else:
       return num
-    
+
+
 #######################################################################################################################################################################################
 
 def Destroy_Item(sec,itemMap):
@@ -577,7 +716,7 @@ def Put_Back(sec,itemMap):
       Drop_Item((player["position"][0]*64+randint(-16,16),player["position"][1]*64+randint(-16,16)),itemMap,player["heldInvObject"]["item"],sec,[64,64])
       player["heldInvObject"]["item"] = items["none"]
 
-def Put_Back_Stack(location,itemMap,sec):
+def Put_Back_Stack(location,itemMap,sec,map):
     if location == "inventory":
       if player[location][player["heldInvObject"]["index"]]["baseInfo"]["type"] == None:
         player[location][player["heldInvObject"]["index"]] = player["heldInvObject"]["item"]
@@ -585,26 +724,39 @@ def Put_Back_Stack(location,itemMap,sec):
       else:  
         player[location][player["heldInvObject"]["index"]]["stack"][0] += player["heldInvObject"]["item"]["stack"][0]
         player["heldInvObject"]["item"] = items["none"]  
-    elif location == "rightHand" or location == "rightHand":
+    elif location == "rightHand" or location == "leftHand":
       if player[location]["baseInfo"]["type"] == None:
         player[location] = player["heldInvObject"]["item"]
         player["heldInvObject"]["item"] = items["none"]  
       else: 
         player[location]["stack"][0] += player["heldInvObject"]["item"]["stack"][0]
         player["heldInvObject"]["item"] = items["none"]
+    elif location == "inv":
+      object = map[Get_Chunk(player["objectOpen"][0],player["objectOpen"][1],mapChunkSize[0],32)]["chunk"][Get_Square(player["objectOpen"][0],player["objectOpen"][1],32)]["baseBlock"]
+      if object[location][player["heldInvObject"]["index"]-25]["baseInfo"]["type"] == None:
+        object[location][player["heldInvObject"]["index"]-25] = player["heldInvObject"]["item"]
+        player["heldInvObject"]["item"] = items["none"]  
+      else:  
+        object[location][player["heldInvObject"]["index"]-25]["stack"][0] += player["heldInvObject"]["item"]["stack"][0]
+        player["heldInvObject"]["item"] = items["none"]  
     else:
       Drop_Item((player["position"][0]*64+randint(-16,16),player["position"][1]*64+randint(-16,16)),itemMap,player["heldInvObject"]["item"],sec,[64,64])
       player["heldInvObject"]["item"] = items["none"]
 
-def Place(num,location):
+def Place(num,location,map):
   if num < 16:
     player[location][num] = player["heldInvObject"]["item"]
     player["heldInvObject"]["item"] = items["none"]
+  if num > 24:
+    object = map[Get_Chunk(player["objectOpen"][0],player["objectOpen"][1],mapChunkSize[0],32)]["chunk"][Get_Square(player["objectOpen"][0],player["objectOpen"][1],32)]["baseBlock"]
+    if object["type"] == "storage":
+      object[location][num-25] = player["heldInvObject"]["item"]
+      player["heldInvObject"]["item"] = items["none"]
   else:
     player[location] = player["heldInvObject"]["item"]
     player["heldInvObject"]["item"] = items["none"]
 
-def Switch(num,location1,location2):
+def Switch(num,location1,location2,map):
   if location2 == "inventory" and player["heldInvObject"]["index"] < 16:
     player[location1][player["heldInvObject"]["index"]] = player[location2][num]
     player[location2][num] = player["heldInvObject"]["item"]
@@ -622,7 +774,7 @@ def Switch(num,location1,location2):
     player[location2] = player["heldInvObject"]["item"]
     player["heldInvObject"]["item"] = items["none"]
 
-def Add_To_Stack(num,location,itemMap,sec):
+def Add_To_Stack(num,location,itemMap,sec,map):
   if num < 16:
     if player[location][num]["stack"][0] + player["heldInvObject"]["item"]["stack"][0] <= player[location][num]["stack"][1]:
       player[location][num]["stack"][0] += player["heldInvObject"]["item"]["stack"][0]
@@ -631,7 +783,18 @@ def Add_To_Stack(num,location,itemMap,sec):
       change = player[location][num]["stack"][1] - player[location][num]["stack"][0]
       player[location][num]["stack"][0] = player[location][num]["stack"][1]
       player["heldInvObject"]["item"]["stack"][0] -= change
-      Put_Back_Stack(location,itemMap,sec)
+      Put_Back_Stack(location,itemMap,sec,map)
+  elif num > 24:
+    if location == "inv":
+      object = map[Get_Chunk(player["objectOpen"][0],player["objectOpen"][1],mapChunkSize[0],32)]["chunk"][Get_Square(player["objectOpen"][0],player["objectOpen"][1],32)]["baseBlock"]
+      if object[location][num-25]["stack"][0] + player["heldInvObject"]["item"]["stack"][0] <= object[location][num-25]["stack"][1]:
+        object[location][num-25]["stack"][0] += player["heldInvObject"]["item"]["stack"][0]
+        player["heldInvObject"]["item"] = items["none"]
+      else:
+        change = object[location][num-25]["stack"][1] - object[location][num-25]["stack"][0]
+        object[location][num-25]["stack"][0] = object[location][num-25]["stack"][1]
+        player["heldInvObject"]["item"]["stack"][0] -= change
+        Put_Back_Stack(location,itemMap,sec,map)
   else:
     if player[location]["stack"][0] + player["heldInvObject"]["item"]["stack"][0] <= player[location]["stack"][1]:
       player[location]["stack"][0] += player["heldInvObject"]["item"]["stack"][0]
@@ -640,7 +803,7 @@ def Add_To_Stack(num,location,itemMap,sec):
       change = player[location]["stack"][1] - player[location]["stack"][0]
       player[location]["stack"][0] = player[location]["stack"][1]
       player["heldInvObject"]["item"]["stack"][0] -= change
-      Put_Back_Stack(location,itemMap,sec)
+      Put_Back_Stack(location,itemMap,sec,map)
 
 def Equipment_Switch(num,location,sec,itemMap):
   if player["heldInvObject"]["item"]["baseInfo"]["type"] == location:
@@ -660,6 +823,14 @@ def Pick_Up(location,num):
       player["heldInvObject"]["item"] = player[location] 
       player[location] = items["none"]
       player["heldInvObject"]["index"] = num
+
+def Object_Pick_Up(num,map):
+      object = map[Get_Chunk(player["objectOpen"][0],player["objectOpen"][1],mapChunkSize[0],32)]["chunk"][Get_Square(player["objectOpen"][0],player["objectOpen"][1],32)]["baseBlock"]
+      if object["type"] == "storage":
+        player["heldInvObject"]["item"] = object["inv"][num-25] 
+        object["inv"][num-25]  = items["none"]
+        player["heldInvObject"]["index"] = num
+        
   
 def Half_Stack(num,location):
   stackSize = location["stack"][0]
@@ -674,6 +845,23 @@ def Half_Stack(num,location):
     location["stack"][0] = stackSize//2 + 1
     player["heldInvObject"]["index"] = num
 
+def Half_Stack_Object(num,map):
+    object = map[Get_Chunk(player["objectOpen"][0],player["objectOpen"][1],mapChunkSize[0],32)]["chunk"][Get_Square(player["objectOpen"][0],player["objectOpen"][1],32)]["baseBlock"]
+    if object["type"] == "storage":
+      if object["inv"][num-25]["baseInfo"]["stacks"]:
+        if not object["inv"][num-25]["stack"][0] == 1:
+          stackSize = object["inv"][num-25]["stack"][0]
+          if stackSize % 2 == 0:
+            player["heldInvObject"]["item"] = Convert_Item(object["inv"][num-25])
+            player["heldInvObject"]["item"]["stack"][0] = stackSize//2
+            object["inv"][num-25]["stack"][0] = stackSize//2
+            player["heldInvObject"]["index"] = num
+          elif stackSize % 2 == 1:
+            player["heldInvObject"]["item"] = Convert_Item(object["inv"][num-25])
+            player["heldInvObject"]["item"]["stack"][0] = stackSize//2
+            object["inv"][num-25]["stack"][0] = stackSize//2 + 1
+            player["heldInvObject"]["index"] = num
+
 
 def Remove_One(num,location):
   player["heldInvObject"]["item"] = Convert_Item(location)
@@ -681,9 +869,19 @@ def Remove_One(num,location):
   location["stack"][0] -= 1
   player["heldInvObject"]["index"] = num
 
+def Remove_One_Object(num,map):
+  object = map[Get_Chunk(player["objectOpen"][0],player["objectOpen"][1],mapChunkSize[0],32)]["chunk"][Get_Square(player["objectOpen"][0],player["objectOpen"][1],32)]["baseBlock"]
+  if object["type"] == "storage":
+    if object["inv"][num-25]["baseInfo"]["stacks"]:
+      if not object["inv"][num-25]["stack"][0] == 1:
+        player["heldInvObject"]["item"] = Convert_Item(object["inv"][num-25])
+        player["heldInvObject"]["item"]["stack"][0] = 1
+        object["inv"][num-25]["stack"][0] -= 1
+        player["heldInvObject"]["index"] = num
+
 #########################################################################################################################################################################################
 
-def Tab_Switch(num,type,mP,itemMap,sec,shift):
+def Tab_Switch(num,type,mP,itemMap,sec,shift,map):
   if type == 0:
     if leftRightMouseButton[0]:  
       if isinstance(num,int):
@@ -709,6 +907,8 @@ def Tab_Switch(num,type,mP,itemMap,sec,shift):
             Pick_Up("craftingTool",num)
           elif num == 24:
             Pick_Up("craftingOutput",num)
+          if not player["objectOpen"][0] == None and num > 24:
+            Object_Pick_Up(num,map)
 
 # # # # # #
 
@@ -723,6 +923,8 @@ def Tab_Switch(num,type,mP,itemMap,sec,shift):
           elif num == 17 and player["rightHand"]["baseInfo"]["stacks"]:
             if not player["rightHand"]["stack"][0] == 1:
               Half_Stack(num,player["rightHand"])
+          if not player["objectOpen"][0] == None and num > 24:
+            Half_Stack_Object(num,map)
 
 # # # # # #
 
@@ -737,6 +939,8 @@ def Tab_Switch(num,type,mP,itemMap,sec,shift):
         elif num == 17 and player["rightHand"]["baseInfo"]["stacks"]:
           if not player["rightHand"][num]["stack"][0] == 1:
             Remove_One(num,player["rightHand"])
+        if not player["objectOpen"][0] == None and num > 24:
+            Remove_One_Object(num,map)
 
 # # # # # #
 
@@ -748,9 +952,9 @@ def Tab_Switch(num,type,mP,itemMap,sec,shift):
                     if not player["heldInvObject"]["item"]["baseInfo"]["type"] == None:
                       if player["heldInvObject"]["item"]["baseInfo"]["name"] == player["inventory"][num]["baseInfo"]["name"] and player["heldInvObject"]["item"]["baseInfo"]["stacks"]:
                         if player["inventory"][num]["stack"][0] < player["inventory"][num]["stack"][1]:
-                          Add_To_Stack(num,"inventory",itemMap,sec)
+                          Add_To_Stack(num,"inventory",itemMap,sec,map)
                         else:
-                          Put_Back_Stack("inventory",itemMap,sec)
+                          Put_Back_Stack("inventory",itemMap,sec,map)
                       else:
                         Switch(num,"inventory","inventory")
                     else:
@@ -788,7 +992,7 @@ def Tab_Switch(num,type,mP,itemMap,sec,shift):
                     else:
                       Put_Back(sec,itemMap)
                   elif player["heldInvObject"]["index"] == 24 and player["heldInvObject"]["item"]["baseInfo"]["type"] == "hand" and player["leftHand"]["baseInfo"]["type"] == None:
-                    Place(num,"leftHand")
+                    Place(num,"leftHand",map)
                   else: 
                     Put_Back(sec,itemMap)
                 elif num == 17:
@@ -802,7 +1006,7 @@ def Tab_Switch(num,type,mP,itemMap,sec,shift):
                     elif player["rightHand"]["second"] == "knife" or player["rightHand"]["second"] == "hammer" or player["rightHand"]["second"] == "screwDriver":
                       Switch(num,"craftingTool","rightHand")
                   elif player["heldInvObject"]["index"] == 24 and player["heldInvObject"]["item"]["baseInfo"]["type"] == "hand" and player["rightHand"]["baseInfo"]["type"] == None:
-                    Place(num,"rightHand")
+                    Place(num,"rightHand",map)
                   else: 
                     Put_Back(sec,itemMap)
                 elif num == 18:
@@ -817,10 +1021,44 @@ def Tab_Switch(num,type,mP,itemMap,sec,shift):
                   Equipment_Switch(num,"gloves",sec,itemMap)
                 elif num == 23 and player["craftingTool"]["baseInfo"]["type"] == None and player["heldInvObject"]["item"]["baseInfo"]["type"] == "hand": 
                   if player["heldInvObject"]["item"]["first"] == "tool" and (player["heldInvObject"]["item"]["second"] == "knife" or player["heldInvObject"]["item"]["second"] == "hammer" or player["heldInvObject"]["item"]["second"] == "screwDriver"):
-                    Place(num,"craftingTool")
+                    Place(num,"craftingTool",map)
                   else: 
                     Put_Back(sec,itemMap)
                 elif num == 24: 
+                      Put_Back(sec,itemMap)
+                elif num > 24:
+                  object = map[Get_Chunk(player["objectOpen"][0],player["objectOpen"][1],mapChunkSize[0],32)]["chunk"][Get_Square(player["objectOpen"][0],player["objectOpen"][1],32)]["baseBlock"]
+                  if object["type"] == "storage":
+                    if player["heldInvObject"]["index"] < 16:
+                      if not player["heldInvObject"]["item"]["baseInfo"]["type"] == None:
+                        if player["heldInvObject"]["item"]["baseInfo"]["name"] == player["inventory"][num]["baseInfo"]["name"] and player["heldInvObject"]["item"]["baseInfo"]["stacks"]:
+                          if object["inv"][num]["stack"][0] < object["inv"][num]["stack"][1]:
+                            Add_To_Stack(num,"inv",itemMap,sec,map) 
+                          else:
+                            Put_Back_Stack("inv",itemMap,sec,map)
+                        else:
+                          Switch(num,"inv","inventory") #
+                      else:
+                        Put_Back(sec,itemMap)
+                    elif player["heldInvObject"]["index"] == 16 and (player["inventory"][num]["baseInfo"]["type"] == "hand" or player["inventory"][num]["baseInfo"]["type"] == None) and not player["heldInvObject"]["item"]["baseInfo"]["type"] == None: 
+                          Switch(num,"leftHand","inventory")
+                    elif player["heldInvObject"]["index"] == 17 and (player["inventory"][num]["baseInfo"]["type"] == "hand" or player["inventory"][num]["baseInfo"]["type"] == None) and not player["heldInvObject"]["item"]["baseInfo"]["type"] == None: 
+                          Switch(num,"rightHand","inventory")
+                    elif player["heldInvObject"]["index"] == 18: 
+                      Equipment_Switch2(num,"helm",sec,itemMap)
+                    elif player["heldInvObject"]["index"] == 19: 
+                      Equipment_Switch2(num,"chest",sec,itemMap)
+                    elif player["heldInvObject"]["index"] == 20: 
+                      Equipment_Switch2(num,"legs",sec,itemMap)
+                    elif player["heldInvObject"]["index"] == 21: 
+                      Equipment_Switch2(num,"boots",sec,itemMap)
+                    elif player["heldInvObject"]["index"] == 22: 
+                      Equipment_Switch2(num,"gloves",sec,itemMap)
+                    elif player["heldInvObject"]["index"] == 23 and player["inventory"][num]["baseInfo"]["type"] == None and not player["heldInvObject"]["item"]["baseInfo"]["type"] == None: 
+                          Switch(num,"craftingTool","inventory")
+                    elif player["heldInvObject"]["index"] == 24 and not player["heldInvObject"]["item"]["baseInfo"]["type"] == None and player["inventory"][num]["baseInfo"]["type"] == None: 
+                          Switch(num,"craftingOutput","inventory")
+                    else:
                       Put_Back(sec,itemMap)
                 else:
                   Put_Back(sec,itemMap)
@@ -835,36 +1073,48 @@ def Tab_Switch(num,type,mP,itemMap,sec,shift):
       if isinstance(num,int):
         if num < 16:
           if player["inventory"][num]["baseInfo"]["type"] == None:
-            Place(num,"inventory")
+            Place(num,"inventory",map)
           elif player["inventory"][num]["baseInfo"]["name"] == player["heldInvObject"]["item"]["baseInfo"]["name"]:
             if player["inventory"][num]["stack"][0] < player["inventory"][num]["stack"][1]:
-              Add_To_Stack(num,"inventory",itemMap,sec)
+              Add_To_Stack(num,"inventory",itemMap,sec,map)
             else:
-              Put_Back_Stack("inventory",itemMap,sec)
+              Put_Back_Stack("inventory",itemMap,sec,map)
           else:
-            Put_Back_Stack("inventory",itemMap,sec)
+            Put_Back_Stack("inventory",itemMap,sec,map)
         elif num == 16:
           if player["leftHand"]["baseInfo"]["type"] == None:
             if player["heldInvObject"]["item"]["baseInfo"]["type"] == "hand":
-              Place(num,"leftHand")
+              Place(num,"leftHand",map)
             else:
-              Put_Back_Stack("leftHand",itemMap,sec)
+              Put_Back_Stack("leftHand",itemMap,sec,map)
           elif player["leftHand"]["baseInfo"]["name"] == player["heldInvObject"]["item"]["baseInfo"]["name"]:
             if player["leftHand"]["stack"][0] < player["leftHand"]["stack"][1]:
-              Add_To_Stack(num,"leftHand",itemMap,sec)
+              Add_To_Stack(num,"leftHand",itemMap,sec,map)
             else:
-              Put_Back_Stack("leftHand",itemMap,sec)
+              Put_Back_Stack("leftHand",itemMap,sec,map)
         elif num == 17:
           if player["rightHand"]["baseInfo"]["type"] == None:
             if player["heldInvObject"]["item"]["baseInfo"]["type"] == "hand":
-              Place(num,"rightHand")
+              Place(num,"rightHand",map)
             else:
-              Put_Back_Stack("rightHand",itemMap,sec)
+              Put_Back_Stack("rightHand",itemMap,sec,map)
           elif player["rightHand"]["baseInfo"]["name"] == player["heldInvObject"]["item"]["baseInfo"]["name"]:
             if player["rightHand"]["stack"][0] < player["rightHand"]["stack"][1]:
-              Add_To_Stack(num,"rightHand")
+              Add_To_Stack(num,"rightHand",map)
             else:
-              Put_Back_Stack("rightHand",itemMap,sec)
+              Put_Back_Stack("rightHand",itemMap,sec,map)
+        elif num > 24:
+            object = map[Get_Chunk(player["objectOpen"][0],player["objectOpen"][1],mapChunkSize[0],32)]["chunk"][Get_Square(player["objectOpen"][0],player["objectOpen"][1],32)]["baseBlock"]
+            if object["type"] == "storage":
+              if object["inv"][num-25]["baseInfo"]["type"] == None:
+                Place(num,"inv",map)
+              elif object["inv"][num-25]["baseInfo"]["name"] == player["heldInvObject"]["item"]["baseInfo"]["name"]:
+                if object["inv"][num-25]["stack"][0] < object["inv"][num-25]["stack"][1]:
+                  Add_To_Stack(num,"inv",itemMap,sec,map)
+                else:
+                  Put_Back_Stack("inv",itemMap,sec,map)
+              else:
+                Put_Back_Stack("inv",itemMap,sec,map)
       else: 
         if not player["heldInvObject"]["item"]["baseInfo"]["type"] == None:
           itemMap = Drop_Item((mP[0]+relativePerspective[0]-16,mP[1]+relativePerspective[1]-16),itemMap,player["heldInvObject"]["item"],sec,[32,32])
@@ -968,22 +1218,17 @@ def Destroy_Block(mP,hand,map,itemMap,sec,blockType):
 def Place_Block(mP,hand,map,activeMap):
   blockPos = Get_Square_Cord(mP[0],mP[1])
   if Dist(player["position"][0],player["position"][1],blockPos[0],blockPos[1]) <=4:
-    if hand == "leftHand":
       if not Check_If_Block_Pix(map,activeMap,mP):
-        if player["leftHand"]["second"] == "active":
-          item = Convert_Blocks(activeBlocks[player["leftHand"]["baseInfo"]["name"]])
+        if player[hand]["second"] == "active":
+          item = Convert_Blocks(activeBlocks[player[hand]["baseInfo"]["name"]])
           item["blockPosition"][0] = blockPos[0]
           item["blockPosition"][1] = blockPos[1]
           activeMap[Get_Chunk_Clicked(mapChunkSize[0],32,int(mP[0]),int(mP[1]))]["chunk"].append(item)
-          player["leftHand"] = items["none"]
-    elif hand == "rightHand":
-      if not Check_If_Block_Pix(map,activeMap,mP):
-        if player["rightHand"]["second"] == "active":
-          item = Convert_Blocks(activeBlocks[player["leftHand"]["baseInfo"]["name"]])
-          item["blockPosition"][0] = blockPos[0]
-          item["blockPosition"][1] = blockPos[1]
-          activeMap[Get_Chunk_Clicked(mapChunkSize[0],32,int(mP[0]),int(mP[1]))]["chunk"].append(item)
-          player["rightHand"] = items["none"]
+          player[hand] = items["none"]
+        elif player[hand]["second"] == "inActive":
+          item = Convert_Blocks(baseBlocks[player[hand]["baseInfo"]["name"]])
+          map[Get_Chunk_Clicked(mapChunkSize[0],32,int(mP[0]),int(mP[1]))]["chunk"][Get_Square_Clicked(32,mP[0],mP[1])]["baseBlock"] = item
+          player[hand] = items["none"]
 
 ##################################################################################################################################################################################
 
@@ -1062,6 +1307,7 @@ def Get_Keyboard_Events_Single_Player_Mode(map,itemMap,activeMap,sec,tick):
     global d
     speed = 10
     tickSpeed = 10
+    mP = pygame.mouse.get_pos()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -1080,9 +1326,20 @@ def Get_Keyboard_Events_Single_Player_Mode(map,itemMap,activeMap,sec,tick):
             d = True
           if event.key == pygame.K_TAB and invOn: ### TAB
              invOn = False
+             player["objectOpen"] = [None,None]
              Close_Inv(sec,itemMap)
           elif event.key == pygame.K_TAB and not invOn:
              invOn = True
+
+          if event.key == pygame.K_e and not invOn: ### TAB
+            if Check_If_Block_Cord(map,activeMap,[player["position"][0]+viewCord[int((Get_Line_Angle([0,0],[mP[0]-960,mP[1]-540])-337.5)//45)][0],player["position"][1]+viewCord[int((Get_Line_Angle([0,0],[mP[0]-960,mP[1]-540])-337.5)//45)][1]]):
+              if map[Get_Chunk(player["position"][0]+viewCord[int((Get_Line_Angle([0,0],[mP[0]-960,mP[1]-540])-337.5)//45)][0],player["position"][1]+viewCord[int((Get_Line_Angle([0,0],[mP[0]-960,mP[1]-540])-337.5)//45)][1],mapChunkSize[0],32)]["chunk"][Get_Square(player["position"][0]+viewCord[int((Get_Line_Angle([0,0],[mP[0]-960,mP[1]-540])-337.5)//45)][0],player["position"][1]+viewCord[int((Get_Line_Angle([0,0],[mP[0]-960,mP[1]-540])-337.5)//45)][1],32)]["baseBlock"]["type"] == "storage":
+                player["objectOpen"] = [player["position"][0]+viewCord[int((Get_Line_Angle([0,0],[mP[0]-960,mP[1]-540])-337.5)//45)][0],player["position"][1]+viewCord[int((Get_Line_Angle([0,0],[mP[0]-960,mP[1]-540])-337.5)//45)][1]]
+                invOn = True
+          elif event.key == pygame.K_e and invOn: 
+              if not player["objectOpen"][0] == None:
+                player["objectOpen"] = [None,None]
+                invOn = False
 
           if event.key == pygame.K_1 and not invOn: 
              Hotbar_Quick_Change(0,"leftHand")
@@ -1095,7 +1352,6 @@ def Get_Keyboard_Events_Single_Player_Mode(map,itemMap,activeMap,sec,tick):
 
         if event.type == pygame.MOUSEBUTTONDOWN and mouseState == "up": ### TAB
           mouseState = 'down'
-          mP = pygame.mouse.get_pos()
           leftRightMouseButton = pygame.mouse.get_pressed()
 
           if invOn:
@@ -1103,8 +1359,8 @@ def Get_Keyboard_Events_Single_Player_Mode(map,itemMap,activeMap,sec,tick):
               Get_Assemble_Items(mP)
             elif player["craftingTool"]["second"] == "knife":
               Get_Carve_Items(mP) 
-            num = Get_All_Inv_Items(mP)
-            Tab_Switch(num,0,mP,itemMap,sec,shift)
+            num = Get_All_Inv_Items(mP,map)
+            Tab_Switch(num,0,mP,itemMap,sec,shift,map)
 
           else:
             Use_Clicked(map,activeMap,itemMap,sec,"leftHand")
@@ -1112,10 +1368,9 @@ def Get_Keyboard_Events_Single_Player_Mode(map,itemMap,activeMap,sec,tick):
 
         if event.type == pygame.MOUSEBUTTONUP and mouseState == "down":
             mouseState = 'up'
-            mP = pygame.mouse.get_pos()
             if invOn and not player["heldInvObject"]["item"] == items["none"]:
-              num = Get_All_Inv_Items(mP)
-              Tab_Switch(num,1,mP,itemMap,sec,shift)
+              num = Get_All_Inv_Items(mP,map)
+              Tab_Switch(num,1,mP,itemMap,sec,shift,map)
               
         if event.type == pygame.KEYUP:
           if event.key == pygame.K_LSHIFT:
@@ -1136,7 +1391,6 @@ def Get_Keyboard_Events_Single_Player_Mode(map,itemMap,activeMap,sec,tick):
       Move_Player(map,activeMap,speed)
 
     if mouseState == "down":
-      mP = pygame.mouse.get_pos()
       leftRightMouseButton = pygame.mouse.get_pressed()
       Use_Pressed_Down(mP,tick,map,activeMap,itemMap,sec,"leftHand")
       Use_Pressed_Down(mP,tick,map,activeMap,itemMap,sec,"rightHand")
@@ -1202,7 +1456,7 @@ def Draw_Item_Chunk(chunk):
     if len(chunk["chunk"]) > 0:
       for item in range(len(chunk["chunk"])):
         if chunk["chunk"][item]["position"][0]-relativePerspective[0] >= -32 and chunk["chunk"][item]["position"][0]-relativePerspective[0] <= WIDTH and chunk["chunk"][item]["position"][1]-relativePerspective[1] >= -32 and chunk["chunk"][item]["position"][1]-relativePerspective[1] <= HEIGHT:
-          Win.blit(Get_Sprite(chunk["chunk"][item]["item"]["baseInfo"]["hotbarSprite"],(0,0,0),64),((chunk["chunk"][item]["position"][0]-relativePerspective[0],chunk["chunk"][item]["position"][1]-relativePerspective[1])))
+          Win.blit(Get_Sprite(chunk["chunk"][item]["item"]["baseInfo"]["itemSprite"],(0,0,0),64),((chunk["chunk"][item]["position"][0]-relativePerspective[0],chunk["chunk"][item]["position"][1]-relativePerspective[1])))
 
 def Draw_Screen_Items(map):
     chunkSpot = player["position"][0]-(((player["position"][0])//32)*32),player["position"][1]-(((player["position"][1])//32)*32)
@@ -1232,11 +1486,11 @@ def Draw_Inv_Item(location,x,y):
 
 def Draw_Assembley():
     Win.blit(Get_Sprite(LO("playerStuff/invItem"),(0,0,0),138),[1305,269])
-    Win.blit(Get_Sprite(LO("invView/stoneKnifeIV"),(0,0,0),128),[1307,274])
+    Win.blit(Get_Sprite(LO("invView/stoneKnife"),(0,0,0),128),[1307,274])
     Win.blit(Get_Sprite(LO("playerStuff/invItem"),(0,0,0),138),[1444,269])
-    Win.blit(Get_Sprite(LO("invView/stoneAxeIV"),(0,0,0),128),[1449,274])
+    Win.blit(Get_Sprite(LO("invView/stoneAxe"),(0,0,0),128),[1449,274])
     Win.blit(Get_Sprite(LO("playerStuff/invItem"),(0,0,0),138),[1583,269])
-    Win.blit(Get_Sprite(LO("invView/campFireIV"),(0,0,0),128),[1588,274])
+    Win.blit(Get_Sprite(LO("invView/campFire"),(0,0,0),128),[1588,274])
 
 def Draw_A_Ingredients(name,mp):
     total = 0
@@ -1270,9 +1524,32 @@ def Draw_Carve_Ingredients(mp):
 
 def Draw_Carve():
     Win.blit(Get_Sprite(LO("playerStuff/invItem"),(0,0,0),138),[1305,269])
-    Win.blit(Get_Sprite(LO("invView/pryStickIV"),(0,0,0),128),[1307,274])
+    Win.blit(Get_Sprite(LO("invView/pryStick"),(0,0,0),128),[1307,274])
     Win.blit(Get_Sprite(LO("playerStuff/invItem"),(0,0,0),138),[1444,269])
-    Win.blit(Get_Sprite(LO("invView/woodAxeHandleIV"),(0,0,0),128),[1449,274])
+    Win.blit(Get_Sprite(LO("invView/woodAxeHandle"),(0,0,0),128),[1449,274])
+
+def Draw_Grid_Objects(gridSize,xy,object):
+    for item in range(gridSize[0]*gridSize[1]):
+         if not object["inv"][item]["baseInfo"]["type"] == None: 
+          Win.blit(Get_Sprite(object["inv"][item]["baseInfo"]["invSprite"],(0,0,0),128),[(item%gridSize[0]*138)+xy[0],(item//gridSize[0]*138)+xy[1]])
+          if object["inv"][item]["baseInfo"]["stacks"]:
+            num = object["inv"][item]["stack"][0]
+            Win.blit(Get_Sprite(LO(f"LN/{num}"),(0,0,0),9),[(item%gridSize[0]*138)+xy[0],(item//gridSize[0]*138)+xy[1]])
+          elif object["inv"][item]["baseInfo"]["type"] == "hand":
+            if object["inv"][item]["first"] == "tool":
+              pygame.draw.polygon(Win,Get_Durability_Color(object["inv"][item]["durability"][0]/object["inv"][item]["durability"][1]),[((item%gridSize[0]*138)+xy[0],(item//gridSize[0]*138)+xy[1]+128),((item%gridSize[0]*138)+xy[0]+(128*(object["inv"][item]["durability"][0]/object["inv"][item]["durability"][1])),(item//gridSize[0]*138)+xy[1]+128),((item%gridSize[0]*138)+xy[0]+(128*(object["inv"][item]["durability"][0]/object["inv"][item]["durability"][1])),(item//gridSize[0]*138)+xy[1]+127),((item%gridSize[0]*138)+xy[0],(item//gridSize[0]*138)+xy[1]+127)])
+
+def Draw_Open_Object(map):
+    object = map[Get_Chunk(player["objectOpen"][0],player["objectOpen"][1],mapChunkSize[0],32)]["chunk"][Get_Square(player["objectOpen"][0],player["objectOpen"][1],32)]["baseBlock"]
+    if object["name"] == "Fired_Clay_Pot":
+      Win.blit(Get_Sprite(LO("objectViews/4Storage"),(0,0,0),1920),[206,402])
+      Draw_Grid_Objects([2,2],[211,407],object)
+    if object["name"] == "Wood_Chest" or object["name"] == "Reinforced_Wood_Chest":
+      Win.blit(Get_Sprite(LO("objectViews/9Storage"),(0,0,0),1920),[137,333])
+      Draw_Grid_Objects([3,3],[142,338],object)
+    if object["name"] == "Iron_Safe" or object["name"] == "Steel_Safe":
+      Win.blit(Get_Sprite(LO("objectViews/16Storage"),(0,0,0),1920),[68,264])
+      Draw_Grid_Objects([4,4],[73,269],object)
 
 def Draw_Inv(mP):
     Win.blit(Get_Sprite(LO("playerStuff/inv"),(0,0,0),552),(684,264))
@@ -1305,22 +1582,22 @@ def Draw_Inv(mP):
 def Draw_Hotbar():
     Win.blit(Get_Sprite(LO("playerStuff/hotbar"),(0,0,0),1068),(426,21))
     if not player["inventory"][0]["baseInfo"]["type"] == None:
-      Win.blit(Get_Sprite(player["inventory"][0]["baseInfo"]["hotbarSprite"],(0,0,0),32),(432,26))
+      Win.blit(Get_Sprite(player["inventory"][0]["baseInfo"]["itemSprite"],(0,0,0),32),(432,26))
       if player["inventory"][0]["baseInfo"]["type"] == "hand":
         if player["inventory"][0]["first"] == "tool":
           pygame.draw.polygon(Win,Get_Durability_Color(player["inventory"][0]["durability"][0]/player["inventory"][0]["durability"][1]),[(432,58),(432+(32*(player["inventory"][0]["durability"][0]/player["inventory"][0]["durability"][1])),58),(432+(32*(player["inventory"][0]["durability"][0]/player["inventory"][0]["durability"][1])),58),(432,58)])
     if not player["inventory"][1]["baseInfo"]["type"] == None:
-      Win.blit(Get_Sprite(player["inventory"][1]["baseInfo"]["hotbarSprite"],(0,0,0),32),(582,26))
+      Win.blit(Get_Sprite(player["inventory"][1]["baseInfo"]["itemSprite"],(0,0,0),32),(582,26))
       if player["inventory"][1]["baseInfo"]["type"] == "hand":
         if player["inventory"][1]["first"] == "tool":
           pygame.draw.polygon(Win,Get_Durability_Color(player["inventory"][1]["durability"][0]/player["inventory"][1]["durability"][1]),[(582,58),(582+(32*(player["inventory"][1]["durability"][0]/player["inventory"][1]["durability"][1])),58),(582+(32*(player["inventory"][1]["durability"][0]/player["inventory"][1]["durability"][1])),58),(582,58)])
     if not player["inventory"][2]["baseInfo"]["type"] == None:
-      Win.blit(Get_Sprite(player["inventory"][2]["baseInfo"]["hotbarSprite"],(0,0,0),32),(1305,26))
+      Win.blit(Get_Sprite(player["inventory"][2]["baseInfo"]["itemSprite"],(0,0,0),32),(1305,26))
       if player["inventory"][2]["baseInfo"]["type"] == "hand":
         if player["inventory"][2]["first"] == "tool":
           pygame.draw.polygon(Win,Get_Durability_Color(player["inventory"][2]["durability"][0]/player["inventory"][2]["durability"][1]),[(1305,58),(1305+(32*(player["inventory"][2]["durability"][0]/player["inventory"][2]["durability"][1])),58),(1305+(32*(player["inventory"][2]["durability"][0]/player["inventory"][2]["durability"][1])),58),(1305,58)])
     if not player["inventory"][3]["baseInfo"]["type"] == None:
-      Win.blit(Get_Sprite(player["inventory"][3]["baseInfo"]["hotbarSprite"],(0,0,0),32),(1456,26))
+      Win.blit(Get_Sprite(player["inventory"][3]["baseInfo"]["itemSprite"],(0,0,0),32),(1456,26))
       if player["inventory"][3]["baseInfo"]["type"] == "hand":
         if player["inventory"][3]["first"] == "tool":
           pygame.draw.polygon(Win,Get_Durability_Color(player["inventory"][3]["durability"][0]/player["inventory"][3]["durability"][1]),[(1456,58),(1456+(32*(player["inventory"][3]["durability"][0]/player["inventory"][3]["durability"][1])),58),(1456+(32*(player["inventory"][3]["durability"][0]/player["inventory"][3]["durability"][1])),58),(1456,58)])
@@ -1339,19 +1616,19 @@ def Draw_Stats():
 def Draw_Hands():
     Win.blit(Get_Sprite(LO("playerStuff/handSlot"),(0,0,0),42),(502,43))
     if not player["leftHand"]["baseInfo"]["type"] == None:
-      Win.blit(Get_Sprite(player["leftHand"]["baseInfo"]["hotbarSprite"],(0,0,0),32),(507,48))
+      Win.blit(Get_Sprite(player["leftHand"]["baseInfo"]["itemSprite"],(0,0,0),32),(507,48))
       if player["leftHand"]["baseInfo"]["type"] == "hand":
         if player["leftHand"]["first"] == "tool":
           pygame.draw.polygon(Win,Get_Durability_Color(player["leftHand"]["durability"][0]/player["leftHand"]["durability"][1]),[(507,80),(507+(32*(player["leftHand"]["durability"][0]/player["leftHand"]["durability"][1])),80),(507+(32*(player["leftHand"]["durability"][0]/player["leftHand"]["durability"][1])),80),(507,80)])
     Win.blit(Get_Sprite(LO("playerStuff/handSlot"),(0,0,0),42),(1378,43))
     if not player["rightHand"]["baseInfo"]["type"] == None:
-      Win.blit(Get_Sprite(player["rightHand"]["baseInfo"]["hotbarSprite"],(0,0,0),32),(1383,48))
+      Win.blit(Get_Sprite(player["rightHand"]["baseInfo"]["itemSprite"],(0,0,0),32),(1383,48))
       if player["rightHand"]["baseInfo"]["type"] == "hand":
         if player["rightHand"]["first"] == "tool":
           pygame.draw.polygon(Win,Get_Durability_Color(player["rightHand"]["durability"][0]/player["rightHand"]["durability"][1]),[(1383,80),(1383+(32*(player["rightHand"]["durability"][0]/player["rightHand"]["durability"][1])),80),(1383+(32*(player["rightHand"]["durability"][0]/player["rightHand"]["durability"][1])),80),(1383,80)])
 
-def Draw_Item_Name(mP):
-  num = Get_All_Inv_Items(mP)
+def Draw_Item_Name(mP,map):
+  num = Get_All_Inv_Items(mP,map)
   if isinstance(num,int):
     if num < 16 and not player["inventory"][num]["baseInfo"]["name"] == None:
       Draw_Word(player["inventory"][num]["baseInfo"]["name"],mP)
@@ -1373,6 +1650,11 @@ def Draw_Item_Name(mP):
       Draw_Word(player["craftingTool"]["baseInfo"]["name"],mP)
     elif num == 24 and not player["craftingOutput"]["baseInfo"]["name"] == None:
       Draw_Word(player["craftingOutput"]["baseInfo"]["name"],mP)
+    elif not player["objectOpen"][0] == None and num > 24:
+      object = map[Get_Chunk(player["objectOpen"][0],player["objectOpen"][1],mapChunkSize[0],32)]["chunk"][Get_Square(player["objectOpen"][0],player["objectOpen"][1],32)]["baseBlock"]
+      if object["type"] == "storage":
+        if not object["inv"][num-25]["baseInfo"]["name"] == None:
+          Draw_Word(object["inv"][num-25]["baseInfo"]["name"],mP)
 
 # # # # # #
 
@@ -1422,7 +1704,9 @@ def Single_Player_Mode():
       Draw_Stats()
       if invOn:
          Draw_Tab(xy)
-         Draw_Item_Name([xy[0],xy[1]-10])
+         if not player["objectOpen"][0] == None:
+           Draw_Open_Object(map)
+         Draw_Item_Name([xy[0],xy[1]-10],map)
       else:
          Draw_Overlay()
       tick +=1
